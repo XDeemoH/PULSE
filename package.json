@@ -1,0 +1,61 @@
+{
+  "name": "@local/dsh-running-panel",
+  "version": "1.1.0",
+  "description": "PULSE — a skills / tools / prompt-budget HUD for DeepSeek Harness: see what this session actually loaded, what it costs, and what can be parked safely.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "skills",
+    "prompt-budget",
+    "hud"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.5",
+    "node": ">=22.23.4"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "catalog.js",
+    "echo-core.js",
+    "goal-core.js",
+    "idea-core.js",
+    "profile-core.js",
+    "translate-core.js",
+    "history-core.js",
+    "session-store.js",
+    "scene-core.js",
+    "suggest-core.js",
+    "packs.js",
+    "cordis.patch.yml",
+    "studio.html",
+    "vendor/contour-field.mjs",
+    "locale/zh.json",
+    "locale/en.json",
+    "icon.svg",
+    "undo-store.js",
+    "catalog-overlay.js",
+    "tools/catalog-sync.mjs"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "build": "node tools/build-client.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "private": true
+}

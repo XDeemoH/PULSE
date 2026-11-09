@@ -1,0 +1,4 @@
+# Text files are stored and checked out with LF; images stay binary.
+* text=auto eol=lf
+*.png binary
+*.webp binary

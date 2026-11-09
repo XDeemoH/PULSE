@@ -1,0 +1,3 @@
+- insert:
+    - id: running-panel
+      name: '@local/dsh-running-panel'

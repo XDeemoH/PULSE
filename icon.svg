@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Running panel">
+  <rect width="64" height="64" rx="14" fill="#3964fe"/>
+  <path d="M10 32h8.5l5.6-14.4 8.8 29.4 6.1-18.7 4.5 9.1H54"
+        fill="none" stroke="#ffffff" stroke-width="4.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

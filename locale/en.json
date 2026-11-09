@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Pulse",
+    "description": "The Pulse panel in the left activity bar: a live ring of this round's call mix, plus skills, tools and agents grouped by source library, showing what is running, what just finished and per-session totals."
+  }
+}

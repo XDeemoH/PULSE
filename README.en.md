@@ -6,7 +6,7 @@ A running panel for [DeepSeek Harness](https://deepseek-harness.github.io/deepse
 
 DSH injects a catalog of skills and tool schemas into every turn, and it is invisible: what this session loaded, how big the catalog is, what happens when you park a skill. PULSE shows it, and turns the dangerous part — parking, which moves files — into dry run, confirm, undo.
 
-![PULSE ring](docs/ring.png)
+<p align="center"><img src="docs/panel.png" width="520" alt="PULSE panel: calls this round by category, catalog budget, context, running skills, skill libraries"></p>
 
 ## Features
 
@@ -21,6 +21,8 @@ DSH injects a catalog of skills and tool schemas into every turn, and it is invi
 - **Install-batch groups, search, most used, context menu** (insert, rename, edit description, open folder, pin, park).
 - **Corner ring** in the conversation header: click to open the panel.
 
+![Skill loadout: budget bar, skills grouped by library, category ring and details](docs/loadout.png)
+
 **Goals and ideas**
 - **Goal bar** (one row above the ring): a running DSH `/goal` takes it (read-only, with phase and round segments); otherwise the workspace's own goal. Click for the drawer: confirm, done, edit, new goal, remove, history.
 - **Focus mode** (off by default): skills, tools and groups not used since the goal started are dimmed.
@@ -34,13 +36,15 @@ DSH injects a catalog of skills and tool schemas into every turn, and it is invi
 - **Suggested favorites**: turns you praised, that delivered files, recovered from errors or were big (up to three, saved only when you click).
 - **Archive search**, including closed sessions.
 
+<p align="center"><img src="docs/echo.png" width="560" alt="ECHO: box-selecting whole messages to copy them with formatting"></p>
+
 **Other**
 - **Auto-translation of new skills**: fills missing Chinese names/descriptions of newly installed skills and plugin tools with your default model (gaps only; your edits are never overwritten).
 - **Look**: follows DSH light/dark; contour backdrop and tactical grid; a mosaic reveal the first time the sidebar opens after DSH starts; all motion honours reduced motion and performance mode.
 - **Sound effects** (off by default): click, expand, collapse, open, done, start working — synthesized live with Web Audio, no audio files.
 - **Version check**: if the panel and the plugin host running inside DSH disagree, a banner tells you to quit DSH completely and reopen it.
 
-![Hover actions and tooltip](docs/hover.png)
+![Settings: the budget line rule with the live formula](docs/settings.png)
 
 ## Privacy and model calls
 

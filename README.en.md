@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.webp" alt="PULSE — a running panel for DeepSeek Harness"></p>
+
 # PULSE · DSH Running Panel
 
 [中文](./README.md)
@@ -9,6 +11,8 @@ DSH injects a catalog of skills and tool schemas into every turn, and it is invi
 <p align="center"><img src="docs/panel.png" width="520" alt="PULSE panel: calls this round by category, catalog budget, context, running skills, skill libraries"></p>
 
 ## Features
+
+<p align="center"><img src="docs/art-budget.webp" width="640" alt="Catalog budget: segments filling up to the budget line"></p>
 
 **Activity and budget**
 - **Session ring** (right sidebar, `PULSE` tab): this turn's calls by category (visual / code / thought / ops), budget ring, catalog size, estimated tokens. Idle: a soft heartbeat in the centre. Working: a bright arc sweeps around; it "ignites" when work starts and fades out when it ends.
@@ -28,6 +32,8 @@ DSH injects a catalog of skills and tool schemas into every turn, and it is invi
 - **Focus mode** (off by default): skills, tools and groups not used since the goal started are dimmed.
 - **Ideas & branches**: the assistant's "next you could…" lists and your own "later" are collected per workspace into the goal drawer. Make one the goal, mark it done, dismiss it, or "↗" jump back to the message it came from. An idea made into the goal follows it (done when the goal is done); ideas done along the way are flagged "maybe done" by the model and count only once you confirm. Past sessions of the project can be collected in one go (with an estimate of model calls first).
 - **Goal proposals**: with no goal, the newest open idea is proposed; with no ideas, the model can infer one from the last few turns. Nothing counts until you click "use as goal".
+
+<p align="center"><img src="docs/art-echo.webp" width="640" alt="ECHO: a saved turn echoing back"></p>
 
 **ECHO (saved excerpts)**
 - Save any answer with 10 floors before and 5 after; a cross-session library with search and jump back.
@@ -104,6 +110,8 @@ Parking moves directories between the shared `~/.agents/skills` and `~/.agents/s
    The host half loads only when the DSH process starts: closing the window to the tray is not enough — quit from the tray icon and reopen. The client half updates on page refresh; the panel warns when the two disagree.
 
 ## Usage
+
+<p align="center"><img src="docs/art-loadout.webp" width="640" alt="Loadout: dropping a skill into an open slot"></p>
 
 - Open the **PULSE** tab in the right sidebar, or click the corner ring.
 - **Goal bar**: open the drawer for goals and ideas; focus mode is in settings.

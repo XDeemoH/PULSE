@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/banner.webp" alt="PULSE — a running panel for DeepSeek Harness"></p>
 
-# PULSE · DSH Running Panel
+# <img src="docs/logo.svg" width="40" align="top" alt=""> PULSE · DSH Running Panel
 
 [中文](./README.md)
 

@@ -165,6 +165,13 @@ Everything localizable is plain data, no build step:
 
 ## Acknowledgements
 
+**Contributors**
+
+- **XDeemo** ([@XDeemoH](https://github.com/XDeemoH)): author — design direction, requirements, hands-on testing and sign-off.
+- **Claude** (Anthropic): code, tests, documentation and screenshots.
+- **GPT** (OpenAI): README banner background and section artwork.
+- **DSH** (the agent inside DeepSeek Harness): early versions, live testing and reviews.
+
 The look and motion are inspired by the interface of Tom Clancy's The Division. The project contains no assets, images or audio from the game, is not affiliated with Ubisoft, and all trademarks belong to their owners.
 
 ## License

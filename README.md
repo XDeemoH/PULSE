@@ -167,6 +167,13 @@ tests/              node:test 测试；test-support/ 里是子进程 Host 和假
 
 ## 致谢
 
+**参与者**
+
+- **XDeemo**（[@XDeemoH](https://github.com/XDeemoH)）：作者。设计方向、需求、真机试用和验收。
+- **Claude**（Anthropic）：编码、测试、文档和截图。
+- **GPT**（OpenAI）：README 横幅背景和分区插图。
+- **DSH**（DeepSeek Harness 里的智能体）：早期版本开发、真机测试和审查。
+
 视觉和动效受《全境封锁》（Tom Clancy's The Division）界面风格启发；项目不包含该游戏的任何素材、图像或音频，与育碧（Ubisoft）没有关联，相关商标归其所有者。
 
 ## 许可

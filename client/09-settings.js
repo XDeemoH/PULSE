@@ -353,7 +353,7 @@
       )
     }
 
-    var CONTOUR_WORKSHOP_URL = 'https://github.com/XDeemoH/contour-workshop'
+    var CONTOUR_WORKSHOP_URL = 'https://xdeemoh.github.io/contour-workshop/' // online version (GitHub Pages); source: https://github.com/XDeemoH/contour-workshop
 
     /** 设置浮层里的「等高线设置」：直接改 prefs.studio，背景实时重绘。 */
     function ContourStudioSettings(props) {

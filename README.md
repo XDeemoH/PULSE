@@ -175,7 +175,7 @@ tests/              node:test 测试；test-support/ 里是子进程 Host 和假
 
 ## 同系列作品
 
-**[等高线工坊 Contour Workshop](https://github.com/XDeemoH/contour-workshop)**：PULSE 面板背景的等高线，单独做成的完整编辑器。可以调地形、放山峰和洼地，把照片转成等高线，加轮廓发光和扫光，导出 3072×4096 的 PNG 或可编辑的 SVG。单个 HTML 文件，离线就能用。PULSE 设置里的「等高线设置」底部也有入口。
+**[等高线工坊 Contour Workshop](https://github.com/XDeemoH/contour-workshop)**：PULSE 面板背景的等高线，单独做成的完整编辑器。可以调地形、放山峰和洼地，把照片转成等高线，加轮廓发光和扫光，导出 3072×4096 的 PNG 或可编辑的 SVG。**[在线试玩](https://xdeemoh.github.io/contour-workshop/)**，也可以下载单个 HTML 文件离线使用。PULSE 设置里的「等高线设置」底部也有入口。
 
 ## 致谢
 

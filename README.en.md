@@ -173,7 +173,7 @@ Everything localizable is plain data, no build step:
 
 ## Related project
 
-**[Contour Workshop](https://github.com/XDeemoH/contour-workshop)**: the contour lines behind the PULSE panel, grown into a full editor. Shape the terrain, place peaks and basins, turn a photo into contours, add edge glow and a light sweep, and export a 3072×4096 PNG or an editable SVG. One HTML file that works offline. There is also a link at the bottom of Contour settings in PULSE.
+**[Contour Workshop](https://github.com/XDeemoH/contour-workshop)**: the contour lines behind the PULSE panel, grown into a full editor. Shape the terrain, place peaks and basins, turn a photo into contours, add edge glow and a light sweep, and export a 3072×4096 PNG or an editable SVG. **[Try it online](https://xdeemoh.github.io/contour-workshop/)**, or download the single HTML file and use it offline. There is also a link at the bottom of Contour settings in PULSE.
 
 ## Acknowledgements
 

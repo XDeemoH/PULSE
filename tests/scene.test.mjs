@@ -21,7 +21,9 @@ const unzstd = promisify(zstdDecompress)
 test('decodeSessionLog reads every concatenated zstd frame, not just the first', async () => {
   const lines = ['{"type":"session","id":"s"}\n', '{"type":"turn/start","data":{"turn":1}}\n', '{"type":"turn/end","data":{"turn":1}}\n']
   const raw = Buffer.concat(lines.map((line) => zstdCompressSync(Buffer.from(line))))
-  assert.equal((await unzstd(raw)).toString(), lines[0], 'node alone stops after the first frame')
+  // Node 22 decodes only the first frame (why decodeSessionLog exists); Node 24 decodes all of them.
+  // Either way, decodeSessionLog must return every line.
+  assert.ok([lines[0], lines.join('')].includes((await unzstd(raw)).toString()), 'native zstd returns the first frame or all frames')
   assert.equal(await decodeSessionLog(raw, unzstd), lines.join(''))
   const torn = Buffer.concat([raw, zstdCompressSync(Buffer.from('{"type":"x"}\n')).subarray(0, 9)])
   assert.equal(await decodeSessionLog(torn, unzstd), lines.join(''), 'a half-written last frame is dropped')

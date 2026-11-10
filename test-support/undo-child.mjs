@@ -23,7 +23,7 @@ syncBuiltinESMExports()
 process.env.DSH_HOME = join(resolve(fixture), '.dsh')
 const { apply } = await import('../index.js')
 const routes = new Map(), disposers = []
-const services = { sessions:{get(){}, list:()=>[]}, skills:{list:async()=>[{name:'demo',description:'test'}]} }
+const services = { sessions:{get(){}, list:()=>[]}, skills:{list:async()=>[{name:'demo',description:'test'}]}, connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) } }
 apply({ sessions:services.sessions, get: name=>services[name], on(){}, effect(fn){ const d=fn(); if(typeof d==='function') disposers.push(d) }, webServer:{register(route){routes.set(route.path,route.handler);return ()=>{}}} })
 async function req(path, body) {
  const request=Readable.from([JSON.stringify(body)]);request.method='POST';request.url=path

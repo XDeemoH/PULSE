@@ -41,7 +41,7 @@ if (scenario === 'echo-malformed') await writeFile(join(dir, 'echoes.json'), '{"
 const listeners = {}, routes = {}, disposers = []
 const session = { id: 'old', header: {}, snapshotEvents: () => [], deriveMessages: () => [{ id: 'm1', role: 'user', content: [{type:'text',text:'hello'}] }, { id: 'm2', role: 'user', content: [{type:'text',text:'world'}] }] }
 const sessions = { get: id => id === 'old' ? session : undefined, list: () => [session] }
-const ctx = { sessions, webServer: { register(route) { routes[route.path] = route.handler; return () => {} } }, get(name) { return this[name] }, on(name, fn) { listeners[name] = fn }, effect(fn) { const d = fn(); if (typeof d === 'function') disposers.push(d) } }
+const ctx = { sessions, connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) }, webServer: { register(route) { routes[route.path] = route.handler; return () => {} } }, get(name) { return this[name] }, on(name, fn) { listeners[name] = fn }, effect(fn) { const d = fn(); if (typeof d === 'function') disposers.push(d) } }
 if (scenario.startsWith('cost-')) {
   const long = { name: 'full-skill', description: 'D'.repeat(400), invocation: { modelInvocable: true } }
   ctx.skills = { list: async () => [long], snapshot: async () => ({ skills: [long] }) }

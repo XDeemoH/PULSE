@@ -65,7 +65,7 @@ if (mode === 'hold-lock') {
   const { apply } = await import('../index.js')
   const routes = new Map()
   const disposers = []
-  const services = { sessions: { get() {}, list: () => [] }, skills: { list: async () => [{ name: 'demo', description: 'fixture' }] } }
+  const services = { sessions: { get() {}, list: () => [] }, skills: { list: async () => [{ name: 'demo', description: 'fixture' }] }, connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) } }
   apply({ sessions: services.sessions, get: name => services[name], on() {},
     effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose) },
     webServer: { register(row) { routes.set(row.path, row.handler); return () => {} } },

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.2 — 2026-11-10
+
+Security: host authentication for every PULSE route.
+
+- **All `/dsh-running-panel/*` routes now go through the host's `ctx.connection.admit()`**, the same trust and login check DSH's own `/api` uses (trusted origin, plus browser login or API credential). Only the owner Peer is admitted, matching DSH's rule for exact routes. Before this, the routes were exact registrations on the web server that skipped the host's check, so a client that could reach the DSH web port without logging in could read conversation content (snapshot, ECHO, search) or change data (goals, ideas, loadouts, parking).
+- Unauthenticated requests get `401`; untrusted origins and non-owner Peers get `403`. The handler never runs, and if the check itself throws, the request is refused.
+- Hosts without `admit()` fall back to the host's `requestRejection()`. Hosts without the `connection` service accept loopback only: the peer address and the Host header must both be loopback.
+- Reported in polang233/dsh-plugin-index#395. `tests/admission.test.mjs` covers every registered route.
+
 ## 1.1.1 — 2026-11-10
 
 Publishing preparation.

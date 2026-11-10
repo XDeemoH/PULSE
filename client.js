@@ -4194,7 +4194,7 @@ window.__ModuleLoader__.load({
     /** Host 报的插件版本（每帧快照都带 pluginVersion）；设置窗口右下角显示。 */
     var pluginVersionSeen = ''
     /** 界面自己的版本：构建时由 tools/build-client.mjs 写入。 */
-    var CLIENT_VERSION = '1.1.1'
+    var CLIENT_VERSION = '1.1.2'
 
     /**
      * 界面每次刷新都换新，Host 只在 DSH 进程启动时加载一次：装完新包只刷新页面，

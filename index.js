@@ -150,6 +150,53 @@ export function crossSiteWrite(req) {
   }
 }
 
+const LOOPBACK_ADDRESS = /^(127\.\d+\.\d+\.\d+|::1|::ffff:127\.\d+\.\d+\.\d+)$/
+
+/**
+ * 宿主准入：所有 /dsh-running-panel/* 路由都是 webServer 上的 exact 注册，不经过 DSH 自己 /api 的
+ * 信任与登录检查，所以每个请求先过一遍宿主的 `connection.admit(request)`——同一套「来源可信 +
+ * 浏览器登录或 API 凭据」，并且只放行 owner Peer（DSH 约定：exact route 对非 owner Peer 返回 403）。
+ * 宿主还没有 admit 时退到 `requestRejection`；连 connection 服务都没有的老宿主只放行本机回环
+ * （对端地址与 Host 头都必须是回环，挡 DNS rebinding）。
+ * @returns 0 = 放行；否则是要回给客户端的 HTTP 状态码（401 / 403 …）。
+ */
+export function admitRequest(connection, req) {
+  if (connection && typeof connection.admit === 'function') {
+    let admission
+    try {
+      admission = connection.admit(req)
+    } catch {
+      return 403 // 准入检查自己出错时不能放行
+    }
+    if (!admission || typeof admission !== 'object') return 403
+    if ('rejection' in admission) return Number(admission.rejection) || 403
+    const peer = admission.peer
+    if (!peer) return 403
+    // 宿主的 principal 是 { kind: 'owner' | … }（browserPeer 即 { kind: 'owner' }）；判断方式与宿主 exact route 一致。
+    const principal = peer.principal
+    const kind = principal && typeof principal === 'object' ? principal.kind : principal
+    if (kind !== 'owner') return 403
+    return 0
+  }
+  if (connection && typeof connection.requestRejection === 'function') {
+    let status
+    try {
+      status = connection.requestRejection(req)
+    } catch {
+      return 403
+    }
+    return status === undefined || status === null ? 0 : Number(status) || 403
+  }
+  const address = String((req && req.socket && req.socket.remoteAddress) || '')
+  let host = ''
+  try {
+    host = new URL('http://' + String((req && req.headers && req.headers.host) || '')).hostname
+  } catch {
+    host = ''
+  }
+  return LOOPBACK_ADDRESS.test(address) && LOOPBACK.has(host) ? 0 : 403
+}
+
 /** 跨平台「在文件管理器里打开」；子进程错误必须接住，否则会以未处理 error 事件打崩 Host。 */
 function openInFileManager(target, select) {
   let command
@@ -4287,55 +4334,77 @@ export function apply(ctx) {
     }
   }
 
+  // 每个路由先过宿主准入（见 admitRequest）。connection 服务在宿主异步初始化之后才出现，所以按请求读取，不在挂载时缓存。
+  let warnedNoConnection = false
+  const admitted = (handler) => (req, res) => {
+    let connection
+    try {
+      connection = ctx.get('connection')
+    } catch {
+      connection = undefined
+    }
+    if (!connection && !warnedNoConnection) {
+      warnedNoConnection = true
+      console.warn('[running-panel] host connection service unavailable; only loopback requests are admitted')
+    }
+    const status = admitRequest(connection, req)
+    if (status) {
+      res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+      res.end(JSON.stringify({ ok: false, error: status === 401 ? 'DSH login required' : 'forbidden' }))
+      return
+    }
+    return handler(req, res)
+  }
+
   // 异步载入；载入失败时保留原文件并通过快照报告。
   loadStore()
   ensureEchoes()
   ensureIdeas()
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: PROFILES_PATH, handler: profilesHandler }),
+    ctx.webServer.register({ kind: 'exact', path: PROFILES_PATH, handler: admitted(profilesHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: LOADOUT_PATH, handler: loadoutHandler }),
+    ctx.webServer.register({ kind: 'exact', path: LOADOUT_PATH, handler: admitted(loadoutHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: IDEA_PATH, handler: ideaHandler }),
+    ctx.webServer.register({ kind: 'exact', path: IDEA_PATH, handler: admitted(ideaHandler) }),
   )
 
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: STREAM_PATH, handler: streamHandler }),
+    ctx.webServer.register({ kind: 'exact', path: STREAM_PATH, handler: admitted(streamHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: SNAPSHOT_PATH, handler: snapshotHandler }),
+    ctx.webServer.register({ kind: 'exact', path: SNAPSHOT_PATH, handler: admitted(snapshotHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/park', handler: parkHandler }),
+    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/park', handler: admitted(parkHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/reveal', handler: revealHandler }),
+    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/reveal', handler: admitted(revealHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/name', handler: nameHandler }),
+    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/name', handler: admitted(nameHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: ECHO_PATH, handler: echoHandler }),
+    ctx.webServer.register({ kind: 'exact', path: ECHO_PATH, handler: admitted(echoHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: GOAL_PATH, handler: goalHandler }),
+    ctx.webServer.register({ kind: 'exact', path: GOAL_PATH, handler: admitted(goalHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: TRANSLATE_PATH, handler: translateHandler }),
+    ctx.webServer.register({ kind: 'exact', path: TRANSLATE_PATH, handler: admitted(translateHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: SEARCH_PATH, handler: sessionSearchHandler }),
+    ctx.webServer.register({ kind: 'exact', path: SEARCH_PATH, handler: admitted(sessionSearchHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/optimize', handler: optimizeHandler }),
+    ctx.webServer.register({ kind: 'exact', path: '/dsh-running-panel/optimize', handler: admitted(optimizeHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: STUDIO_PATH, handler: studioHandler }),
+    ctx.webServer.register({ kind: 'exact', path: STUDIO_PATH, handler: admitted(studioHandler) }),
   )
   ctx.effect(() =>
-    ctx.webServer.register({ kind: 'exact', path: CONTOUR_MODULE_PATH, handler: contourModuleHandler }),
+    ctx.webServer.register({ kind: 'exact', path: CONTOUR_MODULE_PATH, handler: admitted(contourModuleHandler) }),
   )
 
   // 显示名 / tag 词典：客户端启动时取一次，注册进 locale 服务。
@@ -4343,10 +4412,10 @@ export function apply(ctx) {
     ctx.webServer.register({
       kind: 'exact',
       path: CATALOG_PATH,
-      handler: (req, res) => {
+      handler: admitted((req, res) => {
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
         res.end(JSON.stringify(buildCatalog()))
-      },
+      }),
     }),
   )
   ctx.effect(() => () => {

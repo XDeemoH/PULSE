@@ -12,7 +12,7 @@ if (mode !== 'read') await writeFile(echoFile,JSON.stringify({version:1,echoes})
 const listeners={},routes={},disposers=[]
 const messages=[{id:'m1',role:'user',content:[{type:'text',text:'hello'}]},{id:'m2',role:'user',content:[{type:'text',text:'second'}]}]
 const session={id:'old',header:{},snapshotEvents:()=>[],deriveMessages:()=>messages}
-const ctx={sessions:{get:id=>id==='old'?session:undefined,list:()=>[session]},webServer:{register(r){routes[r.path]=r.handler;return ()=>{}}},get(n){return this[n]},on(n,f){listeners[n]=f},effect(f){const d=f();if(typeof d==='function')disposers.push(d)}}
+const ctx={sessions:{get:id=>id==='old'?session:undefined,list:()=>[session]},webServer:{register(r){routes[r.path]=r.handler;return ()=>{}}},connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) },get(n){return this[n]},on(n,f){listeners[n]=f},effect(f){const d=f();if(typeof d==='function')disposers.push(d)}}
 apply(ctx)
 async function request(method,query='',body) { const req=Readable.from(body?[JSON.stringify(body)]:[]);req.method=method;req.url='/dsh-running-panel/echo'+query;return await new Promise((resolve,reject)=>{const res={writeHead(status){this.status=status},end(text){resolve({status:this.status,body:JSON.parse(text)})}};Promise.resolve(routes['/dsh-running-panel/echo'](req,res)).catch(reject)}) }
 if (mode === 'read') {

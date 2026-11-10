@@ -63,6 +63,7 @@ const llm = llmMode && {
 }
 const services = {
   sessions,
+  connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) }, // the host admits these requests as the owner
   ...(llm ? { llm, agentDefaultModel: { currentSelection: () => ({ provider: 'deepseek', model: 'test-model' }) } } : {}),
 }
 // Optional DSH registries: PULSE_TEST_REGISTRY={"skills":[{name,description}],"tools":[{name,description}]}

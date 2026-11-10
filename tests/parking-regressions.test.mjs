@@ -67,6 +67,7 @@ function harness(names = []) {
   const services = {
     sessions: { get() {}, list: () => [] },
     skills: { list: async () => names.map(name => ({ name, description: 'fixture skill' })) },
+    connection: { admit: () => ({ peer: { principal: { kind: 'owner' } } }) }, // the host admits this test's requests as the owner
   }
   apply({
     sessions: services.sessions, get: name => services[name], on() {},

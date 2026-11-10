@@ -1,16 +1,28 @@
 {
-  "name": "@local/dsh-running-panel",
-  "version": "1.1.0",
+  "name": "@xdeemoh/dsh-pulse",
+  "version": "1.1.1",
   "description": "PULSE — a skills / tools / prompt-budget HUD for DeepSeek Harness: see what this session actually loaded, what it costs, and what can be parked safely.",
   "type": "module",
   "license": "MIT",
+  "author": "XDeemo (https://github.com/XDeemoH)",
+  "homepage": "https://github.com/XDeemoH/PULSE#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XDeemoH/PULSE.git"
+  },
+  "bugs": {
+    "url": "https://github.com/XDeemoH/PULSE/issues"
+  },
   "keywords": [
     "deepseek-harness",
     "dsh",
     "dsh-plugin",
     "skills",
     "prompt-budget",
-    "hud"
+    "hud",
+    "deepseek",
+    "pulse",
+    "skill-loadout"
   ],
   "engines": {
     "dsh": ">=0.2.1-rc.5",
@@ -56,6 +68,5 @@
     "client": {
       "platform": "web"
     }
-  },
-  "private": true
+  }
 }

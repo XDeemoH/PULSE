@@ -79,19 +79,30 @@ Parking moves directories between the shared `~/.agents/skills` and `~/.agents/s
 
 > Developed and verified against **DSH desktop `0.2.1-rc.5` / `0.2.2-rc.1`**; standalone development needs **Node `22.23.4` or newer** (`node:sqlite`, zstd). The plugin uses DSH service and event APIs, some of which (goal projection, model service, session log format) are undocumented; a DSH update may break individual features, which the panel tries to degrade quietly.
 
+**One command** (installs from GitHub into the profile you use; `desktop` for the desktop app, `web` for `dsh web`):
+
+```bash
+dsh plugin --profile desktop add github:XDeemoH/PULSE
+```
+
+Then **fully restart** DSH: the host half loads only when the DSH process starts, so closing the window to the tray is not enough — quit from the tray icon and reopen. Update later with `dsh plugin --profile desktop update @xdeemoh/dsh-pulse`; remove with `dsh plugin --profile desktop remove @xdeemoh/dsh-pulse`.
+
+<details>
+<summary>Manual install (from the release zip or a local checkout)</summary>
+
 1. Extract the source release into a stable directory.
 2. Register it in a DSH profile, e.g. `~/.dsh/profiles/desktop/package.json`:
 
    ```jsonc
    {
      "dependencies": {
-       "@local/dsh-running-panel": "link:/absolute/path/to/dsh-running-panel"
+       "@xdeemoh/dsh-pulse": "link:/absolute/path/to/dsh-running-panel"
      },
      "dsh": {
        "profile": {
          "bundles": [
            /* keep your existing bundles */
-           "@local/dsh-running-panel"
+           "@xdeemoh/dsh-pulse"
          ]
        }
      }
@@ -100,14 +111,11 @@ Parking moves directories between the shared `~/.agents/skills` and `~/.agents/s
 
    On Windows use forward slashes in the link path (`link:H:/tools/dsh-running-panel`).
 
-3. Install and **fully restart** DSH:
+3. Run `pnpm install` in the profile folder (or `dsh plugin --profile desktop install`) and fully restart DSH.
 
-   ```bash
-   cd ~/.dsh/profiles/desktop
-   pnpm install
-   ```
+The client half updates on page refresh; the panel warns when the host and client versions disagree.
 
-   The host half loads only when the DSH process starts: closing the window to the tray is not enough — quit from the tray icon and reopen. The client half updates on page refresh; the panel warns when the two disagree.
+</details>
 
 ## Usage
 

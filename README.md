@@ -81,19 +81,30 @@ DSH 每一轮都会把技能目录和工具清单塞进提示词，但你看不�
 
 > 开发和验证用的是 **DSH 桌面版 `0.2.1-rc.5` / `0.2.2-rc.1`**，独立开发需要 **Node `22.23.4` 或更新**（用到 `node:sqlite` 和 zstd）。插件依赖 DSH 的服务和事件接口，其中一部分（目标投影、模型服务、会话日志格式）没有公开文档；DSH 升级后个别功能可能失效，面板会尽量安静地降级。
 
+**一条命令安装**（从 GitHub 装进你用的 profile：桌面版用 `desktop`，`dsh web` 用 `web`）：
+
+```bash
+dsh plugin --profile desktop add github:XDeemoH/PULSE
+```
+
+然后**完全重启** DSH：Host 部分只在 DSH 进程启动时加载，只关窗口（缩到托盘）不够，要从托盘图标退出再打开。以后更新用 `dsh plugin --profile desktop update @xdeemoh/dsh-pulse`，卸载用 `dsh plugin --profile desktop remove @xdeemoh/dsh-pulse`。
+
+<details>
+<summary>手动安装（用 Release 里的源码包或本地目录）</summary>
+
 1. 把源码包解压到一个固定目录。
 2. 在 DSH 的 profile 里注册，例如桌面版 `~/.dsh/profiles/desktop/package.json`：
 
    ```jsonc
    {
      "dependencies": {
-       "@local/dsh-running-panel": "link:/absolute/path/to/dsh-running-panel"
+       "@xdeemoh/dsh-pulse": "link:/absolute/path/to/dsh-running-panel"
      },
      "dsh": {
        "profile": {
          "bundles": [
            /* 保留原有的 bundles */
-           "@local/dsh-running-panel"
+           "@xdeemoh/dsh-pulse"
          ]
        }
      }
@@ -102,14 +113,11 @@ DSH 每一轮都会把技能目录和工具清单塞进提示词，但你看不�
 
    Windows 上 link 路径用正斜杠（`link:H:/tools/dsh-running-panel`）。
 
-3. 安装并**完全重启** DSH：
+3. 在 profile 目录运行 `pnpm install`（或 `dsh plugin --profile desktop install`），然后完全重启 DSH。
 
-   ```bash
-   cd ~/.dsh/profiles/desktop
-   pnpm install
-   ```
+界面部分刷新页面即可更新；Host 和界面版本不一致时面板会提示。
 
-   Host 部分只在 DSH 进程启动时加载：只关窗口（缩到托盘）不够，要从托盘图标退出再打开。界面部分刷新页面即可更新；两边版本不一致时面板会提示。
+</details>
 
 ## 使用
 

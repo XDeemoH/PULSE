@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1 — 2026-11-10
+
+Publishing preparation.
+
+- **Package renamed `@local/dsh-running-panel` → `@xdeemoh/dsh-pulse`** (also the plugin id in `cordis.patch.yml` and the client). Saved data is unaffected (it lives in `running-panel/`); the right-sidebar tab is re-registered under the new id. Existing manual installs: change the dependency key and the bundle entry in your profile's `package.json` to `@xdeemoh/dsh-pulse`, run `dsh plugin --profile <name> install`, restart DSH.
+- **One-command install** documented and verified in a clean profile: `dsh plugin --profile desktop add github:XDeemoH/PULSE` (registers the bundle automatically).
+- `package.json`: author, repository, homepage, bugs; no longer `private`, so it can be published to npm later. `screenshots.json` for plugin listings.
+
 ## 1.1.0 — 2026-11-09
 
 First public release. The code is 1.0.27; the 1.0.x entries below are the development history before publishing.

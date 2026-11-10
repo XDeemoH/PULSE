@@ -18,7 +18,7 @@
  * ============================================================================
  */
 window.__ModuleLoader__.load({
-  id: '@local/dsh-running-panel',
+  id: '@xdeemoh/dsh-pulse',
   factory: (require) => {
     var React = require('react')
     var h = React.createElement
@@ -31,7 +31,7 @@ window.__ModuleLoader__.load({
 
     var NS = 'runningPanel'
     var RIGHT_KIND = 'running-panel'
-    var RIGHT_TAB_ID = '@local/dsh-running-panel/panel'
+    var RIGHT_TAB_ID = '@xdeemoh/dsh-pulse/panel'
 
     var zh = {
       nav: '脉冲',

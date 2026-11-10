@@ -79,10 +79,10 @@ Parking moves directories between the shared `~/.agents/skills` and `~/.agents/s
 
 > Developed and verified against **DSH desktop `0.2.1-rc.5` / `0.2.2-rc.1`**; standalone development needs **Node `22.23.4` or newer** (`node:sqlite`, zstd). The plugin uses DSH service and event APIs, some of which (goal projection, model service, session log format) are undocumented; a DSH update may break individual features, which the panel tries to degrade quietly.
 
-**One command.** First quit DSH completely (tray icon → Quit; the CLI refuses to change the desktop profile while it runs), then install from GitHub into the profile you use — `desktop` for the desktop app, `web` for `dsh web`:
+**One command.** First quit DSH completely (tray icon → Quit; the CLI refuses to change the desktop profile while it runs), then install from npm into the profile you use — `desktop` for the desktop app, `web` for `dsh web`:
 
 ```bash
-dsh plugin --profile desktop add github:XDeemoH/PULSE
+dsh plugin --profile desktop add @xdeemoh/dsh-pulse
 ```
 
 Then open DSH again. (The host half loads only when the DSH process starts, so after any later update, closing the window to the tray is not enough — quit from the tray icon and reopen.) Update later with `dsh plugin --profile desktop update @xdeemoh/dsh-pulse`; remove with `dsh plugin --profile desktop remove @xdeemoh/dsh-pulse`.

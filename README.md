@@ -81,10 +81,10 @@ DSH 每一轮都会把技能目录和工具清单塞进提示词，但你看不�
 
 > 开发和验证用的是 **DSH 桌面版 `0.2.1-rc.5` / `0.2.2-rc.1`**，独立开发需要 **Node `22.23.4` 或更新**（用到 `node:sqlite` 和 zstd）。插件依赖 DSH 的服务和事件接口，其中一部分（目标投影、模型服务、会话日志格式）没有公开文档；DSH 升级后个别功能可能失效，面板会尽量安静地降级。
 
-**一条命令安装。** 先从托盘图标完全退出 DSH（DSH 运行时命令行不允许改桌面版 profile），再从 GitHub 装进你用的 profile：桌面版用 `desktop`，`dsh web` 用 `web`：
+**一条命令安装。** 先从托盘图标完全退出 DSH（DSH 运行时命令行不允许改桌面版 profile），再从 npm 装进你用的 profile：桌面版用 `desktop`，`dsh web` 用 `web`：
 
 ```bash
-dsh plugin --profile desktop add github:XDeemoH/PULSE
+dsh plugin --profile desktop add @xdeemoh/dsh-pulse
 ```
 
 装好后重新打开 DSH。（Host 部分只在 DSH 进程启动时加载，以后每次更新同样要从托盘图标完全退出再打开，只关窗口不够。）以后更新用 `dsh plugin --profile desktop update @xdeemoh/dsh-pulse`，卸载用 `dsh plugin --profile desktop remove @xdeemoh/dsh-pulse`。

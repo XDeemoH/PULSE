@@ -353,6 +353,8 @@
       )
     }
 
+    var CONTOUR_WORKSHOP_URL = 'https://github.com/XDeemoH/contour-workshop'
+
     /** 设置浮层里的「等高线设置」：直接改 prefs.studio，背景实时重绘。 */
     function ContourStudioSettings(props) {
       var t = props.t
@@ -581,6 +583,13 @@
             },
           }),
           h('span', { className: '__rp_sheetLabel' }, t('studioDashed')),
+        ),
+        // 完整版工坊（独立仓库）：照片转等高线、轮廓发光、PNG/SVG 导出
+        h(
+          'div',
+          { className: '__rp_sheetRow' },
+          h('span', { className: '__rp_sheetLabel' }, t('studioMore')),
+          h('a', { className: '__rp_linkBtn', href: CONTOUR_WORKSHOP_URL, target: '_blank', rel: 'noopener noreferrer', style: { textDecoration: 'none' } }, t('studioMoreLink')),
         ),
       )
     )

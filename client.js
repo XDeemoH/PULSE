@@ -134,6 +134,8 @@ window.__ModuleLoader__.load({
       contourSvg: '等高线 · 流光',
       contourStudio: '工坊（连续）',
       studioSection: '等高线设置',
+      studioMore: '完整版等高线工坊：照片转等高线、PNG / SVG 导出',
+      studioMoreLink: '打开 ↗',
       frostSection: '毛玻璃',
       pricingSection: '成本单价',
       pricingHint: '本地估算用；单位：人民币元 / 百万 token。DSH 不提供统一价格，填你当前模型/渠道的单价。',
@@ -744,6 +746,8 @@ window.__ModuleLoader__.load({
       contourSvg: 'Contours · sweep',
       contourStudio: 'Studio (continuous)',
       studioSection: 'Contour settings',
+      studioMore: 'Full Contour Workshop: photo to contours, PNG / SVG export',
+      studioMoreLink: 'Open ↗',
       frostSection: 'Frosted glass',
       pricingSection: 'Token price',
       pricingHint: 'For local estimates only; CNY per 1M tokens. DSH exposes no universal price—enter your model/channel rate.',
@@ -3852,6 +3856,8 @@ window.__ModuleLoader__.load({
       )
     }
 
+    var CONTOUR_WORKSHOP_URL = 'https://github.com/XDeemoH/contour-workshop'
+
     /** 设置浮层里的「等高线设置」：直接改 prefs.studio，背景实时重绘。 */
     function ContourStudioSettings(props) {
       var t = props.t
@@ -4080,6 +4086,13 @@ window.__ModuleLoader__.load({
             },
           }),
           h('span', { className: '__rp_sheetLabel' }, t('studioDashed')),
+        ),
+        // 完整版工坊（独立仓库）：照片转等高线、轮廓发光、PNG/SVG 导出
+        h(
+          'div',
+          { className: '__rp_sheetRow' },
+          h('span', { className: '__rp_sheetLabel' }, t('studioMore')),
+          h('a', { className: '__rp_linkBtn', href: CONTOUR_WORKSHOP_URL, target: '_blank', rel: 'noopener noreferrer', style: { textDecoration: 'none' } }, t('studioMoreLink')),
         ),
       )
     )

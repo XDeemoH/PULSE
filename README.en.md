@@ -171,6 +171,10 @@ Everything localizable is plain data, no build step:
 | Hover one-liners | `SHORT_DESCS` / `TOOL_TIPS` | Chinese only; the English UI shows the capability's own description |
 | Capabilities installed later | `~/.dsh/running-panel/catalog-overlay.json` | per key (`skill:<id>` / `tool:<id>`) `{ zh, en }`; auto-translation writes here too |
 
+## Related project
+
+**[Contour Workshop](https://github.com/XDeemoH/contour-workshop)**: the contour lines behind the PULSE panel, grown into a full editor. Shape the terrain, place peaks and basins, turn a photo into contours, add edge glow and a light sweep, and export a 3072×4096 PNG or an editable SVG. One HTML file that works offline. There is also a link at the bottom of Contour settings in PULSE.
+
 ## Acknowledgements
 
 **Contributors**

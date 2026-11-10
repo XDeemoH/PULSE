@@ -173,6 +173,10 @@ tests/              node:test 测试；test-support/ 里是子进程 Host 和假
 | 悬停短说明 | `SHORT_DESCS` / `TOOL_TIPS` | 只有中文；英文界面显示能力自带的说明 |
 | 之后安装的能力 | `~/.dsh/running-panel/catalog-overlay.json` | 按键（`skill:<id>` / `tool:<id>`）写 `{ zh, en }`；自动翻译也写在这里 |
 
+## 同系列作品
+
+**[等高线工坊 Contour Workshop](https://github.com/XDeemoH/contour-workshop)**：PULSE 面板背景的等高线，单独做成的完整编辑器。可以调地形、放山峰和洼地，把照片转成等高线，加轮廓发光和扫光，导出 3072×4096 的 PNG 或可编辑的 SVG。单个 HTML 文件，离线就能用。PULSE 设置里的「等高线设置」底部也有入口。
+
 ## 致谢
 
 **参与者**

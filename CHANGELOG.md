@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3 — 2026-11-11
+
+Security: refuse every request when the host's authentication service is missing.
+
+- **No more loopback fallback.** When the host has no `connection` service (including early in DSH startup, before it is ready), or the service supports neither `admit()` nor `requestRejection()`, every `/dsh-running-panel/*` route now answers `503` with `{ ok: false, error: 'DSH authentication service unavailable' }` and the handler never runs. 1.1.2 still let a loopback peer with a loopback Host header through in that case, so the search route could return private conversation excerpts without a login.
+- **The panel reconnects by itself.** Browsers close an `EventSource` after a 401/503 and never retry, so the live stream now reopens with backoff (2 s, doubling up to 30 s) instead of staying dead until the panel is reopened.
+- Reported in polang233/dsh-plugin-index#395 (second review). `tests/admission.test.mjs` covers the missing and unsupported service cases on every registered route, search included. Tests: 284.
+
 ## 1.1.2 — 2026-11-10
 
 Security: host authentication for every PULSE route.

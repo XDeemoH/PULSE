@@ -150,15 +150,16 @@ export function crossSiteWrite(req) {
   }
 }
 
-const LOOPBACK_ADDRESS = /^(127\.\d+\.\d+\.\d+|::1|::ffff:127\.\d+\.\d+\.\d+)$/
+/** 宿主没有可用的认证服务时返回的状态：失败即关闭（fail closed），不按回环地址放行。 */
+export const AUTH_UNAVAILABLE = 503
 
 /**
  * 宿主准入：所有 /dsh-running-panel/* 路由都是 webServer 上的 exact 注册，不经过 DSH 自己 /api 的
  * 信任与登录检查，所以每个请求先过一遍宿主的 `connection.admit(request)`——同一套「来源可信 +
  * 浏览器登录或 API 凭据」，并且只放行 owner Peer（DSH 约定：exact route 对非 owner Peer 返回 403）。
- * 宿主还没有 admit 时退到 `requestRejection`；连 connection 服务都没有的老宿主只放行本机回环
- * （对端地址与 Host 头都必须是回环，挡 DNS rebinding）。
- * @returns 0 = 放行；否则是要回给客户端的 HTTP 状态码（401 / 403 …）。
+ * 宿主还没有 admit 时退到 `requestRejection`。connection 服务缺失（包括宿主启动早期尚未就绪）或两种
+ * 方法都不支持时一律拒绝（503），不再凭回环地址和 Host 头放行。
+ * @returns 0 = 放行；否则是要回给客户端的 HTTP 状态码（401 / 403 / 503）。
  */
 export function admitRequest(connection, req) {
   if (connection && typeof connection.admit === 'function') {
@@ -187,14 +188,7 @@ export function admitRequest(connection, req) {
     }
     return status === undefined || status === null ? 0 : Number(status) || 403
   }
-  const address = String((req && req.socket && req.socket.remoteAddress) || '')
-  let host = ''
-  try {
-    host = new URL('http://' + String((req && req.headers && req.headers.host) || '')).hostname
-  } catch {
-    host = ''
-  }
-  return LOOPBACK_ADDRESS.test(address) && LOOPBACK.has(host) ? 0 : 403
+  return AUTH_UNAVAILABLE
 }
 
 /** 跨平台「在文件管理器里打开」；子进程错误必须接住，否则会以未处理 error 事件打崩 Host。 */
@@ -4345,12 +4339,12 @@ export function apply(ctx) {
     }
     if (!connection && !warnedNoConnection) {
       warnedNoConnection = true
-      console.warn('[running-panel] host connection service unavailable; only loopback requests are admitted')
+      console.warn('[running-panel] host connection service unavailable; all PULSE requests are refused (503) until it is ready')
     }
     const status = admitRequest(connection, req)
     if (status) {
       res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
-      res.end(JSON.stringify({ ok: false, error: status === 401 ? 'DSH login required' : 'forbidden' }))
+      res.end(JSON.stringify({ ok: false, error: status === 401 ? 'DSH login required' : status === AUTH_UNAVAILABLE ? 'DSH authentication service unavailable' : 'forbidden' }))
       return
     }
     return handler(req, res)

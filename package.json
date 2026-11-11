@@ -1,6 +1,6 @@
 {
   "name": "@xdeemoh/dsh-pulse",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "PULSE — a skills / tools / prompt-budget HUD for DeepSeek Harness: see what this session actually loaded, what it costs, and what can be parked safely.",
   "type": "module",
   "license": "MIT",

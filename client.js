@@ -4207,7 +4207,7 @@ window.__ModuleLoader__.load({
     /** Host 报的插件版本（每帧快照都带 pluginVersion）；设置窗口右下角显示。 */
     var pluginVersionSeen = ''
     /** 界面自己的版本：构建时由 tools/build-client.mjs 写入。 */
-    var CLIENT_VERSION = '1.1.2'
+    var CLIENT_VERSION = '1.1.3'
 
     /**
      * 界面每次刷新都换新，Host 只在 DSH 进程启动时加载一次：装完新包只刷新页面，
@@ -8948,14 +8948,7 @@ window.__ModuleLoader__.load({
               return { url: url, snapshot: previous.url === url ? previous.snapshot : null, failed: failed }
             })
           }
-          var source
-          try {
-            source = new EventSource(url)
-          } catch (error) {
-            status(true)
-            return undefined
-          }
-          source.onmessage = function (message) {
+          var onMessage = function (message) {
             if (!alive) return
             try {
               var parsed = JSON.parse(message.data)
@@ -8978,16 +8971,39 @@ window.__ModuleLoader__.load({
               /* 非法分片忽略，等下一帧 */
             }
           }
-          // 重连成功就把“重连中”撤掉，不必等下一帧数据。
-          source.onopen = function () {
-            status(false)
+          var source = null
+          var timer = null
+          var delay = 2000
+          // 浏览器在 4xx/5xx（例如宿主认证服务尚未就绪时的 503、未登录的 401）后会关闭 EventSource 且不再自动重连，
+          // 所以连接被关闭时由这里退避重开（2s 起，最长 30s）；网络中断这类可自动重连的错误仍交给浏览器。
+          var connect = function () {
+            timer = null
+            if (!alive) return
+            try {
+              source = new EventSource(url)
+            } catch (error) {
+              status(true)
+              return
+            }
+            source.onmessage = onMessage
+            // 重连成功就把“重连中”撤掉，不必等下一帧数据。
+            source.onopen = function () {
+              delay = 2000
+              status(false)
+            }
+            source.onerror = function () {
+              status(true)
+              if (alive && source && source.readyState === 2 && timer === null) {
+                timer = setTimeout(connect, delay)
+                delay = Math.min(delay * 2, 30000)
+              }
+            }
           }
-          source.onerror = function () {
-            status(true)
-          }
+          connect()
           return function () {
             alive = false
-            source.close()
+            if (timer !== null) clearTimeout(timer)
+            if (source) source.close()
           }
         },
         [url],

@@ -1,7 +1,7 @@
 // Host admission: every /dsh-running-panel/* route must pass the host's connection.admit() before its handler runs.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { apply, admitRequest } from '../index.js'
+import { apply, admitRequest, AUTH_UNAVAILABLE } from '../index.js'
 
 const req = (over = {}) => ({ method: 'GET', url: '/dsh-running-panel/snapshot', headers: { host: 'localhost:3094' }, socket: { remoteAddress: '127.0.0.1' }, ...over })
 
@@ -28,12 +28,58 @@ test('older hosts: requestRejection() is used when admit() is missing', () => {
   assert.equal(admitRequest({ requestRejection: () => { throw new Error('boom') } }, req()), 403)
 })
 
-test('no connection service: loopback peer AND loopback Host only (no DNS rebinding, no LAN)', () => {
-  assert.equal(admitRequest(undefined, req()), 0)
-  assert.equal(admitRequest(undefined, req({ socket: { remoteAddress: '::ffff:127.0.0.1' }, headers: { host: '127.0.0.1:3094' } })), 0)
-  assert.equal(admitRequest(undefined, req({ socket: { remoteAddress: '192.168.1.20' } })), 403)
-  assert.equal(admitRequest(undefined, req({ headers: { host: 'attacker.example:3094' } })), 403)
-  assert.equal(admitRequest(undefined, req({ socket: {} })), 403)
+test('no usable auth service: refused (503) for every peer, loopback included', () => {
+  assert.equal(AUTH_UNAVAILABLE, 503)
+  assert.equal(admitRequest(undefined, req()), 503)
+  assert.equal(admitRequest(null, req()), 503)
+  assert.equal(admitRequest({}, req()), 503)
+  assert.equal(admitRequest({ admit: 'yes', requestRejection: 0 }, req()), 503)
+  assert.equal(admitRequest(undefined, req({ socket: { remoteAddress: '::ffff:127.0.0.1' }, headers: { host: '127.0.0.1:3094' } })), 503)
+  assert.equal(admitRequest(undefined, req({ socket: { remoteAddress: '192.168.1.20' } })), 503)
+})
+
+async function routesWith(connection) {
+  const routes = new Map()
+  const disposers = []
+  const services = { sessions: { get() {}, list: () => [] }, connection }
+  apply({
+    sessions: services.sessions, get: (name) => services[name], on() {},
+    effect(fn) { const d = fn(); if (typeof d === 'function') disposers.push(d); return d },
+    webServer: { register(row) { routes.set(row.path, row.handler); return () => {} } },
+  })
+  const call = (path, over = {}) => new Promise((done) => {
+    const res = {
+      status: 0, body: '',
+      writeHead(s) { this.status = s; return this }, setHeader() {}, write(c) { this.body += c; return true },
+      end(c) { if (c) this.body += c; done(this) }, on() {}, once() {}, flushHeaders() {},
+    }
+    routes.get(path)(req({ url: path, method: 'POST', headers: { host: 'localhost:3094', 'content-type': 'application/json' }, ...over }), res)
+  })
+  const dispose = async () => { for (const d of disposers.reverse()) await d() }
+  return { routes, call, dispose }
+}
+
+test('missing connection service: every route, search included, answers 503 from a loopback peer', async () => {
+  const { routes, call, dispose } = await routesWith(undefined)
+  try {
+    assert.ok(routes.has('/dsh-running-panel/search'))
+    for (const path of routes.keys()) {
+      const result = await call(path)
+      assert.equal(result.status, 503, `${path} should be refused`)
+      assert.match(result.body, /authentication service unavailable/i, `${path} body`)
+    }
+  } finally {
+    await dispose()
+  }
+})
+
+test('connection service without admit() or requestRejection(): every route answers 503', async () => {
+  const { routes, call, dispose } = await routesWith({ somethingElse() {} })
+  try {
+    for (const path of routes.keys()) assert.equal((await call(path)).status, 503, path)
+  } finally {
+    await dispose()
+  }
 })
 
 test('every registered route answers the rejection and never reaches its handler', async () => {

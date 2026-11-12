@@ -163,6 +163,11 @@
         )
       })
 
+      // 技能推荐栏（原型）：探针挂在输入框卡片内，可见部分 portal 到 body、贴着输入框左侧。
+      ctx.slots.inject('conversation.input.overlay', function () {
+        return ctx.slots.register({ name: 'conversation.input.overlay', id: 'running-panel-skill-dock', order: 90 }, SkillDockProbe)
+      })
+
       // 对话右上角常驻圆盘：不开侧边栏也能看本轮调用构成。
       ctx.slots.inject('shell.overlay', function () {
         return ctx.slots.register({ name: 'shell.overlay', id: 'running-panel-corner', order: 40 }, function () {

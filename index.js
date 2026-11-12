@@ -55,6 +55,7 @@ import { createUndoStore, validDirectoryName } from './undo-store.js'
 import { createSessionDiskProbe, decodeSessionLog, findSessionOnDisk } from './session-store.js'
 import { buildScene, parseEventLines } from './scene-core.js'
 import { suggestEchoes } from './suggest-core.js'
+import { suggestSkills } from './skill-suggest-core.js'
 import { activeProfile, loadoutPlan, removeProfile, saveProfile, switchPlan, updateProfile } from './profile-core.js'
 import { catalogOverlayPath, readCatalogOverlay, updateCatalogOverlay } from './catalog-overlay.js'
 import { spawn } from 'node:child_process'
@@ -79,6 +80,7 @@ const IDEA_PATH = '/dsh-running-panel/idea'
 const PROFILES_PATH = '/dsh-running-panel/profiles'
 const LOADOUT_PATH = '/dsh-running-panel/loadout'
 const SEARCH_PATH = '/dsh-running-panel/search'
+const SKILL_SUGGEST_PATH = '/dsh-running-panel/skill-suggest'
 /** 等高线工坊是一个单文件 HTML（约 46KB，图形全部由程序生成）；启动时读一次，路由直接吐。 */
 const STUDIO_HTML = (() => {
   try {
@@ -3907,6 +3909,55 @@ export function apply(ctx) {
     return rows.sort((a, b) => b.lastAt - a.lastAt).slice(0, 40)
   }
 
+  /** 装配窗口与技能推荐共用：每个自装技能（含冷层）的体积、类别、用量、常用搭档和占用会话。 */
+  async function buildLoadoutSkills(sessionId) {
+    const session = sessionFor(sessionId)
+    const state = await liveSkillState()
+    const catalog = buildCatalog()
+    const totals = totalsForWrite()
+    const described = new Map()
+    for (const row of await readSkillDescriptions()) if (row && row.kind !== 'tool' && !described.has(row.name)) described.set(row.name, row.description || '')
+    const rows = usageSessionRows()
+    const titles = new Map()
+    for (const row of rows) if (!row.title) titles.set(row.id, await archiveTitle(String(row.id)).catch(() => ''))
+    const inUse = skillsInUse(sessionId)
+    const coldByName = new Map(state.cold.map((row) => [row.name, row.directoryName]))
+    // 隐藏目录（.third-party-licenses 之类）不是技能。
+    const names = [...new Set([...state.live, ...state.cold.map((row) => row.name)])].filter((name) => !String(name).startsWith('.'))
+    // 体积按模型实际收到的目录行算（和侧栏公告预算同一口径）；不在目录里的（冷层）才按 SKILL.md 描述估。
+    const modelCatalog = (await modelSkillCatalog(session)) || []
+    const catalogByName = new Map(modelCatalog.filter(Boolean).map((item) => [String(item.name || ''), item]))
+    const skills = names.map((name) => {
+      const key = 'skill:' + name
+      const description = String(described.get(name) || '')
+      const tag = catalog.tagOf[key] || 'other'
+      const usage = totals[key] || { n: 0, at: 0 }
+      const recent = rows.filter((row) => row.skills[name]).slice(0, 3).map((row) => ({ sessionId: row.id, title: row.title || titles.get(row.id) || '', at: row.lastAt }))
+      const together = new Map()
+      for (const row of rows) {
+        if (!row.skills[name]) continue
+        for (const other of Object.keys(row.skills)) if (other !== name) together.set(other, (together.get(other) || 0) + 1)
+      }
+      return {
+        name,
+        live: state.live.includes(name),
+        directoryName: coldByName.get(name) || userSkillDirectory(name) || name,
+        movable: state.movable.has(name) || coldByName.has(name),
+        tokens: Math.max(1, Math.round(catalogLineChars(catalogByName.get(name) || { name, description }) / 4)),
+        tag,
+        group: TAG_GROUP[tag] || 'ops',
+        lib: catalog.libOf[key] || 'user',
+        uses: usage.n || 0,
+        lastAt: usage.at || 0,
+        description: description.slice(0, 400),
+        recent,
+        together: [...together.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map((pair) => pair[0]),
+        inUse: inUse.get(name) || [],
+      }
+    })
+    return { session, catalog, skills, names, modelCatalog }
+  }
+
   async function loadoutHandler(req, res) {
     const send = (code, body) => {
       res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
@@ -3916,50 +3967,7 @@ export function apply(ctx) {
       if (req.method !== 'GET') return send(405, { error: 'GET only' })
       const url = new URL(req.url || LOADOUT_PATH, 'http://127.0.0.1')
       const sessionId = url.searchParams.get('session') || ''
-      const session = sessionFor(sessionId)
-      const state = await liveSkillState()
-      const catalog = buildCatalog()
-      const totals = totalsForWrite()
-      const described = new Map()
-      for (const row of await readSkillDescriptions()) if (row && row.kind !== 'tool' && !described.has(row.name)) described.set(row.name, row.description || '')
-      const rows = usageSessionRows()
-      const titles = new Map()
-      for (const row of rows) if (!row.title) titles.set(row.id, await archiveTitle(String(row.id)).catch(() => ''))
-      const inUse = skillsInUse(sessionId)
-      const coldByName = new Map(state.cold.map((row) => [row.name, row.directoryName]))
-      // 隐藏目录（.third-party-licenses 之类）不是技能。
-      const names = [...new Set([...state.live, ...state.cold.map((row) => row.name)])].filter((name) => !String(name).startsWith('.'))
-      // 体积按模型实际收到的目录行算（和侧栏公告预算同一口径）；不在目录里的（冷层）才按 SKILL.md 描述估。
-      const modelCatalog = (await modelSkillCatalog(session)) || []
-      const catalogByName = new Map(modelCatalog.filter(Boolean).map((item) => [String(item.name || ''), item]))
-      const skills = names.map((name) => {
-        const key = 'skill:' + name
-        const description = String(described.get(name) || '')
-        const tag = catalog.tagOf[key] || 'other'
-        const usage = totals[key] || { n: 0, at: 0 }
-        const recent = rows.filter((row) => row.skills[name]).slice(0, 3).map((row) => ({ sessionId: row.id, title: row.title || titles.get(row.id) || '', at: row.lastAt }))
-        const together = new Map()
-        for (const row of rows) {
-          if (!row.skills[name]) continue
-          for (const other of Object.keys(row.skills)) if (other !== name) together.set(other, (together.get(other) || 0) + 1)
-        }
-        return {
-          name,
-          live: state.live.includes(name),
-          directoryName: coldByName.get(name) || userSkillDirectory(name) || name,
-          movable: state.movable.has(name) || coldByName.has(name),
-          tokens: Math.max(1, Math.round(catalogLineChars(catalogByName.get(name) || { name, description }) / 4)),
-          tag,
-          group: TAG_GROUP[tag] || 'ops',
-          lib: catalog.libOf[key] || 'user',
-          uses: usage.n || 0,
-          lastAt: usage.at || 0,
-          description: description.slice(0, 400),
-          recent,
-          together: [...together.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map((pair) => pair[0]),
-          inUse: inUse.get(name) || [],
-        }
-      })
+      const { session, skills, names, modelCatalog } = await buildLoadoutSkills(sessionId)
       // 内置 / 预设技能：在模型目录里、但不是自装的，搬不动，合成一段算进预算。
       const userSet = new Set(names)
       const builtin = modelCatalog.filter((item) => item && !userSet.has(String(item.name || '')))
@@ -3979,6 +3987,69 @@ export function apply(ctx) {
         contextWindow,
         profiles: await profilesView(),
       })
+    } catch (error) {
+      return send((error && error.status) || 500, { error: String(error && (error.code || error.message) || error) })
+    }
+  }
+
+  /** 本会话最近几条用户消息（新→旧），给技能推荐做上下文；只取正文，截断到 2000 字。 */
+  function recentUserTexts(session, limit = 3) {
+    if (!session || typeof session.snapshotEvents !== 'function') return []
+    const out = []
+    try {
+      const events = session.snapshotEvents()
+      for (let i = events.length - 1; i >= 0 && out.length < limit; i -= 1) {
+        const event = events[i]
+        if (!event || event.type !== 'user/message' || !event.data) continue
+        const text = contentText(event.data.content)
+        if (text) out.push(text.slice(0, 2000))
+      }
+    } catch {
+      return out
+    }
+    return out
+  }
+
+  /**
+   * 技能推荐：POST { session, draft, dismissed[], picked{name: 次数} } → { suggestions[], budget }。
+   * 只读：不移动任何技能；打分是本地纯函数（skill-suggest-core.js），不调模型。
+   */
+  async function skillSuggestHandler(req, res) {
+    const send = (code, body) => {
+      res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+      res.end(JSON.stringify(body))
+    }
+    if (req.method !== 'POST') return send(405, { error: 'POST only' })
+    if (crossSiteWrite(req)) return send(403, { error: 'cross-site request refused' })
+    try {
+      const body = await readJsonBody(req)
+      const sessionId = typeof body.session === 'string' ? body.session : ''
+      const draft = typeof body.draft === 'string' ? body.draft.slice(0, 4000) : ''
+      const dismissed = Array.isArray(body.dismissed) ? body.dismissed.filter((name) => typeof name === 'string').slice(0, 200) : []
+      const picked = {}
+      if (body.picked && typeof body.picked === 'object') {
+        for (const [name, count] of Object.entries(body.picked).slice(0, 300)) if (typeof name === 'string' && Number.isFinite(Number(count))) picked[name] = Math.max(0, Math.min(1000, Number(count)))
+      }
+      const { session, catalog, skills } = await buildLoadoutSkills(sessionId)
+      const state = states.get(sessionId)
+      const used = state ? Object.entries(state.skills).filter(([, record]) => record && record.total + (record.base || 0) > 0).map(([name]) => name) : []
+      const rows = skills.map((skill) => {
+        const key = 'skill:' + skill.name
+        const label = catalog.names[key]
+        const desc = catalog.descs[key]
+        return {
+          ...skill,
+          zh: label && label.zh ? label.zh : '',
+          descriptionZh: desc && desc.zh ? desc.zh : '',
+          together: skill.together,
+        }
+      })
+      const suggestions = suggestSkills(rows, { draft, recent: recentUserTexts(session), used, dismissed, picked }).map((row) => {
+        const skill = skills.find((item) => item.name === row.name)
+        return { ...row, directoryName: skill ? skill.directoryName : row.name, uses: skill ? skill.uses : 0, inUse: skill ? skill.inUse : [] }
+      })
+      const liveTokens = skills.filter((skill) => skill.live).reduce((sum, skill) => sum + skill.tokens, 0)
+      return send(200, { ok: true, suggestions, budget: { liveTokens } })
     } catch (error) {
       return send((error && error.status) || 500, { error: String(error && (error.code || error.message) || error) })
     }
@@ -4359,6 +4430,9 @@ export function apply(ctx) {
   )
   ctx.effect(() =>
     ctx.webServer.register({ kind: 'exact', path: LOADOUT_PATH, handler: admitted(loadoutHandler) }),
+  )
+  ctx.effect(() =>
+    ctx.webServer.register({ kind: 'exact', path: SKILL_SUGGEST_PATH, handler: admitted(skillSuggestHandler) }),
   )
   ctx.effect(() =>
     ctx.webServer.register({ kind: 'exact', path: IDEA_PATH, handler: admitted(ideaHandler) }),

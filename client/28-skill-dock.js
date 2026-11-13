@@ -107,14 +107,14 @@
       )
     }
     /**
-     * 把输入框内容拆成正文和引用块：引用（斜杠菜单插入的技能、@ 文件等）是不可编辑的节点，
+     * 把输入框内容拆成正文和引用块：引用（斜杠菜单插入的技能、@ 文件等）是 [data-composer-text-ref] 或不可编辑的节点，
      * 文字单独交给 Host 识别是哪个技能，正文里去掉，免得技能名被当成内容去匹配别的技能。
      */
     function sdDraftParts(input) {
       if (!input) return { text: '', chips: [] }
       var chips = []
       var clone = input.cloneNode(true)
-      Array.prototype.slice.call(clone.querySelectorAll('[contenteditable="false"]')).forEach(function (node) {
+      Array.prototype.slice.call(clone.querySelectorAll('[data-composer-text-ref],[contenteditable="false"]')).forEach(function (node) {
         var label = String(node.textContent || '').trim()
         if (label) chips.push(label)
         node.parentNode.removeChild(node)

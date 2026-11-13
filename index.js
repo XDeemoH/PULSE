@@ -4011,7 +4011,7 @@ export function apply(ctx) {
   }
 
   /**
-   * 技能推荐：POST { session, draft, dismissed[], picked{name: 次数} } → { suggestions[], budget }。
+   * 技能推荐：POST { session, draft, referenced[]（引用块文字）, dismissed[], picked{name: 次数} } → { suggestions[], budget }。
    * 只读：不移动任何技能；打分是本地纯函数（skill-suggest-core.js），不调模型。
    */
   async function skillSuggestHandler(req, res) {
@@ -4026,6 +4026,7 @@ export function apply(ctx) {
       const sessionId = typeof body.session === 'string' ? body.session : ''
       const draft = typeof body.draft === 'string' ? body.draft.slice(0, 4000) : ''
       const dismissed = Array.isArray(body.dismissed) ? body.dismissed.filter((name) => typeof name === 'string').slice(0, 200) : []
+      const referenced = Array.isArray(body.referenced) ? body.referenced.filter((text) => typeof text === 'string').map((text) => text.slice(0, 120)).slice(0, 50) : []
       const picked = {}
       if (body.picked && typeof body.picked === 'object') {
         for (const [name, count] of Object.entries(body.picked).slice(0, 300)) if (typeof name === 'string' && Number.isFinite(Number(count))) picked[name] = Math.max(0, Math.min(1000, Number(count)))
@@ -4044,7 +4045,7 @@ export function apply(ctx) {
           together: skill.together,
         }
       })
-      const suggestions = suggestSkills(rows, { draft, recent: recentUserTexts(session), used, dismissed, picked }).map((row) => {
+      const suggestions = suggestSkills(rows, { draft, referenced, recent: recentUserTexts(session), used, dismissed, picked }).map((row) => {
         const skill = skills.find((item) => item.name === row.name)
         return { ...row, directoryName: skill ? skill.directoryName : row.name, uses: skill ? skill.uses : 0, inUse: skill ? skill.inUse : [] }
       })

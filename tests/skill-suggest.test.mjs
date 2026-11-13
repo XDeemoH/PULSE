@@ -90,3 +90,20 @@ test('weak tail matches far below the best one are not shown; clicks from the do
   assert.ok(boosted.match > (base ? base.match : 0))
   assert.ok(boosted.reasons.some((reason) => reason.kind === 'picked') || boosted.reasons.length === 2)
 })
+
+test('skills already referenced in the draft are not suggested and their names do not leak into matching', async () => {
+  const { extractReferences } = await import('../skill-suggest-core.js')
+  const pool = skills.concat([{ name: 'craft-anything', zh: '逆向调研', description: 'Research any software or game interface with evidence.', live: true, together: ['frontend-design'] }])
+  const ref = extractReferences('/craft-anything 看看这个游戏的界面', pool, [])
+  assert.deepEqual(ref.names, ['craft-anything'])
+  assert.ok(!ref.text.includes('craft'))
+  const out = suggestSkills(pool, { draft: '/craft-anything 帮我把季度数据做成 PDF 报告' })
+  assert.equal(out.some((row) => row.name === 'craft-anything'), false)
+  assert.equal(out[0].name, 'pdf')
+  // 引用块（界面传来的文字，可能是中文名）同样识别；被引用的技能照样带出常用搭档。
+  const chip = suggestSkills(pool, { draft: '', referenced: ['逆向调研'] })
+  assert.equal(chip.some((row) => row.name === 'craft-anything'), false)
+  assert.ok(chip.some((row) => row.name === 'frontend-design' && row.reasons[0].kind === 'pair'))
+  // 不是技能的斜杠词保持原样
+  assert.equal(extractReferences('路径 /usr/bin 下', pool, []).text, '路径 /usr/bin 下')
+})

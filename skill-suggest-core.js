@@ -142,6 +142,30 @@ export function overlap(textTerms, terms, idf, minWeight = 0) {
 const squash = (x) => 1 - Math.exp(-x)
 
 /**
+ * 草稿里已经引用的技能：`/技能名` 文本，或界面传来的引用块文字（技能名或中文名）。
+ * 返回去掉这些引用后的正文和被引用的技能名。引用的名字不该再当成「草稿内容」去匹配别的技能。
+ */
+export function extractReferences(draft, skills, chips) {
+  const byName = new Map()
+  for (const skill of skills) {
+    byName.set(String(skill.name).toLowerCase(), skill.name)
+    if (skill.zh) byName.set(String(skill.zh).toLowerCase(), skill.name)
+  }
+  const names = new Set()
+  for (const chip of Array.isArray(chips) ? chips : []) {
+    const key = String(chip || '').trim().replace(/^\//, '').toLowerCase()
+    if (byName.has(key)) names.add(byName.get(key))
+  }
+  const text = String(draft || '').replace(/(^|[\s(（,，])\/([a-z0-9][\w.:-]*)/gi, (all, lead, token) => {
+    const name = byName.get(token.toLowerCase())
+    if (!name) return all
+    names.add(name)
+    return lead + ' '
+  })
+  return { text, names: [...names] }
+}
+
+/**
  * 名字专注度：技能名里的词（按 IDF 加权）被草稿说中了多少。名字讲的是别的事（如「上古卷轴 Mod 排错」
  * 之于一般的脚本报错）时打折，最多打到 0.6；名字被说中越多越接近 1。
  */
@@ -160,17 +184,21 @@ function nameFocus(terms, queryTerms, idf) {
 
 /**
  * skills: [{ name, zh?, description?, descriptionZh?, live, movable, tokens, group, uses, together: string[] }]
- * context: { draft?, recent?: string[]（新→旧）, used?: string[]（本会话已加载）, dismissed?: string[] }
+ * context: { draft?, referenced?: string[]（草稿里引用块的文字）, recent?: string[]（新→旧）, used?: string[]（本会话已加载）,
+ *            dismissed?: string[], picked?: { name: 次数 } }
  * 返回按得分排序的推荐：[{ name, zh, match(0–1), reasons: [{ kind, text }], live, movable, tokens, group }]
  */
 export function suggestSkills(skills, context = {}) {
   const list = (Array.isArray(skills) ? skills : []).filter((skill) => skill && typeof skill.name === 'string' && skill.name && !skill.name.startsWith('.'))
   if (!list.length) return []
   const dismissed = new Set(Array.isArray(context.dismissed) ? context.dismissed : [])
-  const used = new Set(Array.isArray(context.used) ? context.used : [])
+  const refs = extractReferences(context.draft, list, context.referenced)
+  const referenced = new Set(refs.names)
+  // 已引用的技能算作本会话在用：照样拿来找常用搭档，但它自己不再出现在推荐里。
+  const used = new Set((Array.isArray(context.used) ? context.used : []).concat(refs.names))
   const termSets = list.map(skillTerms)
   const idf = inverseFrequency(termSets)
-  const draftTerms = queryTerms(context.draft)
+  const draftTerms = queryTerms(refs.text)
   const recent = (Array.isArray(context.recent) ? context.recent : []).slice(0, 3).map(queryTerms)
   // 搭档关系双向算：已用技能把它列为常用搭档，或它把某个已用技能列为常用搭档，都算一次。
   const togetherOf = (skill) => (Array.isArray(skill.together) ? skill.together : [])
@@ -182,7 +210,7 @@ export function suggestSkills(skills, context = {}) {
   const maxHits = Math.max(0, ...draftHits.map((hit) => hit.hits))
   const results = []
   list.forEach((skill, index) => {
-    if (dismissed.has(skill.name)) return
+    if (dismissed.has(skill.name) || referenced.has(skill.name)) return
     const terms = termSets[index]
     const reasons = []
     const draft = draftHits[index]

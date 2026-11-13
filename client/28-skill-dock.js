@@ -106,6 +106,21 @@
         h('path', { d: 'M5.5 7V5a2.5 2.5 0 0 1 5 0v2', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4 }),
       )
     }
+    /**
+     * 把输入框内容拆成正文和引用块：引用（斜杠菜单插入的技能、@ 文件等）是不可编辑的节点，
+     * 文字单独交给 Host 识别是哪个技能，正文里去掉，免得技能名被当成内容去匹配别的技能。
+     */
+    function sdDraftParts(input) {
+      if (!input) return { text: '', chips: [] }
+      var chips = []
+      var clone = input.cloneNode(true)
+      Array.prototype.slice.call(clone.querySelectorAll('[contenteditable="false"]')).forEach(function (node) {
+        var label = String(node.textContent || '').trim()
+        if (label) chips.push(label)
+        node.parentNode.removeChild(node)
+      })
+      return { text: String(clone.textContent || '').trim(), chips: chips.slice(0, 50) }
+    }
     function sdPicked() {
       return prefs.skillDockPicks && typeof prefs.skillDockPicks === 'object' ? prefs.skillDockPicks : {}
     }
@@ -205,12 +220,12 @@
             })
           }
           var load = function () {
-            var input = card.querySelector('[data-composer-input]')
-            var draft = input ? String(input.innerText || '').trim() : ''
+            var parts = sdDraftParts(card.querySelector('[data-composer-input]'))
+            var draft = parts.text
             fetch('/dsh-running-panel/skill-suggest', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ session: sessionId || '', draft: draft, dismissed: sdDismissed(), picked: sdPicked() }),
+              body: JSON.stringify({ session: sessionId || '', draft: draft, referenced: parts.chips, dismissed: sdDismissed(), picked: sdPicked() }),
             })
               .then(function (response) {
                 return response.ok ? response.json() : null

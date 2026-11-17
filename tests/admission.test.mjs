@@ -114,3 +114,10 @@ test('every registered route answers the rejection and never reaches its handler
     for (const d of disposers.reverse()) await d()
   }
 })
+
+test('profileDrift: uninstalled-but-loaded and installed-but-not-loaded bundles', async () => {
+  const { profileDrift } = await import('../index.js')
+  assert.deepEqual(profileDrift(['a', 'b', 'c'], ['a', 'c', 'd']), { removed: ['b'], added: ['d'] })
+  assert.deepEqual(profileDrift(['a'], ['a']), { removed: [], added: [] })
+  assert.deepEqual(profileDrift(null, undefined), { removed: [], added: [] })
+})

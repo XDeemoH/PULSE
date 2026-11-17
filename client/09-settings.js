@@ -714,6 +714,21 @@
       return Boolean(pluginVersionSeen) && pluginVersionSeen !== CLIENT_VERSION
     }
 
+    var profileDriftSeen = null
+    /** 插件已卸载 / 新装但还没重启：DSH 只在启动时加载插件，提示一下免得以为没生效。 */
+    function ProfileDrift(props) {
+      var t = props.t
+      var drift = profileDriftSeen
+      if (!drift) return null
+      var removed = Array.isArray(drift.removed) ? drift.removed : []
+      var added = Array.isArray(drift.added) ? drift.added : []
+      if (!removed.length && !added.length) return null
+      var parts = []
+      if (removed.length) parts.push(fill(t('driftRemoved'), 'names', removed.join('、')))
+      if (added.length) parts.push(fill(t('driftAdded'), 'names', added.join('、')))
+      return h('div', { className: '__rp_warnBox __rp_driftWarn', role: 'status', key: 'profile-drift' }, parts.join(' ') + ' ' + t('driftRestart'))
+    }
+
     function VersionMismatch(props) {
       var t = props.t
       if (!hostOutdated()) return null
@@ -867,6 +882,51 @@
       ]
     }
 
+    /**
+     * 设置窗口打开时，右侧栏里的 PULSE 面板不虚化、不压暗：遮罩在面板的位置挖一个洞（mask 同样裁掉 backdrop-filter），
+     * 设置窗口在剩下的区域里居中，改视效设置时能直接看到面板的变化。面板收起（宽度 0）时不挖洞。
+     */
+    function usePanelCutout() {
+      var pair = React.useState(null)
+      var rect = pair[0]
+      var setRect = pair[1]
+      React.useEffect(function () {
+        var measure = function () {
+          var panel = document.querySelector('[data-sidebar-right-session] .__rp_root')
+          var box = panel ? panel.getBoundingClientRect() : null
+          var next = box && box.width > 40 && box.height > 40 ? { x: Math.round(box.left), y: Math.round(box.top), w: Math.round(box.width), h: Math.round(box.height) } : null
+          setRect(function (previous) {
+            if (!next || !previous) return next
+            return previous.x === next.x && previous.y === next.y && previous.w === next.w && previous.h === next.h ? previous : next
+          })
+        }
+        measure()
+        window.addEventListener('resize', measure)
+        var timer = window.setInterval(measure, 800)
+        return function () {
+          window.removeEventListener('resize', measure)
+          window.clearInterval(timer)
+        }
+      }, [])
+      if (!rect) return {}
+      var hole = 'linear-gradient(#000,#000)'
+      var mask = {
+        WebkitMaskImage: hole + ',' + hole,
+        maskImage: hole + ',' + hole,
+        WebkitMaskSize: '100% 100%,' + rect.w + 'px ' + rect.h + 'px',
+        maskSize: '100% 100%,' + rect.w + 'px ' + rect.h + 'px',
+        WebkitMaskPosition: '0 0,' + rect.x + 'px ' + rect.y + 'px',
+        maskPosition: '0 0,' + rect.x + 'px ' + rect.y + 'px',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+      }
+      // 面板在右边：窗口让出这块地方，在左侧剩余区域居中。
+      if (rect.x > window.innerWidth / 2) mask.paddingRight = window.innerWidth - rect.x + 24 + 'px'
+      return mask
+    }
+
     function SettingsSheet(props) {
       var t = props.t
       usePrefs()
@@ -874,6 +934,7 @@
       var resetOpen = resetPair[0]
       var setResetOpen = resetPair[1]
       var closing = useMenuClose(function () { uiStore.set(false) })
+      var cutout = usePanelCutout()
       var requestClose = closing[1]
       var requestCloseRef = React.useRef(requestClose)
       requestCloseRef.current = requestClose
@@ -994,7 +1055,7 @@
         {
           className: '__rp_setWrap',
           'data-closing': closing[0] ? '1' : undefined,
-          style: menuMotionStyle(),
+          style: Object.assign({}, menuMotionStyle(), cutout),
           onClick: function (event) {
             if (event.target === event.currentTarget) requestClose()
           },
@@ -1096,6 +1157,7 @@
             'div',
             { className: '__rp_inner', style: opts && opts.reveal ? { filter: 'url(#__rp_px)' } : undefined },
             h(VersionMismatch, { t: t }),
+            h(ProfileDrift, { t: t }),
             children,
           ),
         ),

@@ -59,7 +59,7 @@ import { suggestSkills } from './skill-suggest-core.js'
 import { activeProfile, loadoutPlan, removeProfile, saveProfile, switchPlan, updateProfile } from './profile-core.js'
 import { catalogOverlayPath, readCatalogOverlay, updateCatalogOverlay } from './catalog-overlay.js'
 import { spawn } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import { mkdir, readdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import { zstdDecompress } from 'node:zlib'
 import { promisify } from 'node:util'
@@ -213,6 +213,18 @@ function openInFileManager(target, select) {
   const child = spawn(command, args, options)
   child.on('error', () => {})
   child.unref()
+}
+
+/**
+ * 插件清单与运行中的插件不一致：清单里已经删掉、但这次启动时加载过的（卸载了还没重启），
+ * 以及清单里新加、但还没加载的（装了还没重启）。只比较名字，纯函数。
+ */
+export function profileDrift(startedBundles, currentBundles) {
+  const started = Array.isArray(startedBundles) ? startedBundles.filter((name) => typeof name === 'string') : []
+  const current = Array.isArray(currentBundles) ? currentBundles.filter((name) => typeof name === 'string') : []
+  const now = new Set(current)
+  const then = new Set(started)
+  return { removed: started.filter((name) => !now.has(name)), added: current.filter((name) => !then.has(name)) }
 }
 
 export const inject = ['webServer', 'sessions']
@@ -741,6 +753,29 @@ export function apply(ctx) {
    * subagent 运行时给出的 id 也可能是裸 uuid），三种写法都试一次，避免因为前缀
    * 差异把父子关系或任务描述丢掉。
    */
+  /** 读当前配置的插件清单（按修改时间缓存），和启动时加载的清单比，给面板提示「重启后生效」。 */
+  let driftCache = { mtime: -1, value: { removed: [], added: [] } }
+  function currentProfileDrift() {
+    let profile
+    try {
+      profile = ctx.get('profileContext')
+    } catch {
+      profile = undefined
+    }
+    if (!profile || !profile.dir || !Array.isArray(profile.startedBundles)) return { removed: [], added: [] }
+    try {
+      const manifest = join(profile.dir, 'package.json')
+      const mtime = statSync(manifest).mtimeMs
+      if (mtime !== driftCache.mtime) {
+        const bundles = JSON.parse(readFileSync(manifest, 'utf8'))?.dsh?.profile?.bundles
+        driftCache = { mtime, value: profileDrift(profile.startedBundles, bundles) }
+      }
+      return driftCache.value
+    } catch {
+      return { removed: [], added: [] }
+    }
+  }
+
   function sessionFor(id) {
     if (!id) return undefined
     const sessions = get('sessions')
@@ -1444,6 +1479,8 @@ export function apply(ctx) {
     return {
       version: 1,
       pluginVersion: PLUGIN_VERSION,
+      /** 插件清单改了但还没重启：面板据此提示「重启 DSH 后生效」。 */
+      profileDrift: currentProfileDrift(),
       /** 词典版本：变了客户端就重拉 /catalog（新装技能、分组变化、外部改了覆盖层）。 */
       catalogVersion: buildCatalog().stamp,
       time: Date.now(),
@@ -3501,6 +3538,7 @@ export function apply(ctx) {
     return {
       version: 1,
       pluginVersion: PLUGIN_VERSION,
+      profileDrift: currentProfileDrift(),
       time: Date.now(),
       mode: 'global',
       storage: storageStatus(),

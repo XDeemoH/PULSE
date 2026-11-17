@@ -23,6 +23,7 @@
         clientLayout = null
       }
       echoT = t
+      sdT = t
       try {
         clientSessions = ctx.get('sessions') || null
       } catch (error) {

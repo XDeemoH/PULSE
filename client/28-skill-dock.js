@@ -11,10 +11,10 @@
     var SD_FULL = 176
     var SD_MINI = 56
     var SD_GROUPS = [
-      ['visual', '视觉'],
-      ['code', '代码'],
-      ['thought', '思考'],
-      ['ops', '行动'],
+      ['visual', 'sdGVisual'],
+      ['code', 'sdGCode'],
+      ['thought', 'sdGThought'],
+      ['ops', 'sdGOps'],
     ]
     var SD_CSS = [
       '.__rp_sd{position:fixed;z-index:35;display:flex;align-items:flex-end;gap:6px;padding:7px 9px 5px 7px;border-radius:4px;box-sizing:border-box;color:#d9dee2;font-size:12px;--rp-amber:#ff7f00;background:linear-gradient(90deg,rgba(12,14,17,.70),rgba(12,14,17,.30));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);transform:perspective(900px) rotateY(9deg);transform-origin:left center;animation:__rp_sdIn .22s cubic-bezier(.2,.8,.2,1) both;overflow:hidden}',
@@ -75,6 +75,13 @@
       return node
     }
 
+    /** 由 29-plugin 在挂载时设成 ctx.locale.bind(NS)；没设时原样返回键名。 */
+    var sdT = null
+    function sdS(key, vars) {
+      var text = sdT ? sdT(key) : key
+      for (var name in vars || {}) text = fill(text, name, vars[name])
+      return text
+    }
     function sdLabel(item) {
       return (item && (item.zh || item.name)) || ''
     }
@@ -87,11 +94,11 @@
     }
     function sdReason(reason) {
       if (!reason) return ''
-      if (reason.kind === 'draft') return '提到「' + reason.text + '」'
-      if (reason.kind === 'recent') return '最近说过「' + reason.text + '」'
-      if (reason.kind === 'pair') return reason.text ? '常和「' + reason.text + '」一起用' : '常和本会话的技能一起用'
-      if (reason.kind === 'habit') return '你常用'
-      if (reason.kind === 'picked') return '你常从这里选'
+      if (reason.kind === 'draft') return sdS('sdWhyDraft', { x: reason.text })
+      if (reason.kind === 'recent') return sdS('sdWhyRecent', { x: reason.text })
+      if (reason.kind === 'pair') return reason.text ? sdS('sdWhyPair', { x: reason.text }) : sdS('sdWhyPairAny')
+      if (reason.kind === 'habit') return sdS('sdWhyHabit')
+      if (reason.kind === 'picked') return sdS('sdWhyPicked')
       return ''
     }
     function sdTok(value) {
@@ -342,7 +349,7 @@
               className: '__rp_sdRow',
               'data-sel': selected ? '1' : undefined,
               'data-off': item.live ? undefined : '1',
-              title: sdLabel(item) + ' · /' + item.name + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · 已停用') + ' · 右键不再推荐',
+              title: sdLabel(item) + ' · /' + item.name + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · ' + sdS('sdParked')) + ' · ' + sdS('sdHideHint'),
               onClick: function () {
                 if (compact) props.onUse(item)
                 else setSel(selected ? null : item.name)
@@ -369,11 +376,11 @@
                 h(
                   'div',
                   null,
-                  sdTok(item.tokens) + ' tok · 用过 ' + (item.uses || 0) + ' 次' + (item.loaded ? ' · 本会话已加载' : ''),
+                  sdTok(item.tokens) + ' tok · ' + sdS('sdUses', { n: item.uses || 0 }) + (item.loaded ? ' · ' + sdS('sdLoaded') : ''),
                 ),
                 item.live
                   ? null
-                  : h('div', { style: { color: limit && after > limit ? '#ff8a6a' : '#8b949a' } }, '已停用 · 启用后预算 ' + sdTok(after) + (limit ? ' / ' + sdTok(limit) : '')),
+                  : h('div', { style: { color: limit && after > limit ? '#ff8a6a' : '#8b949a' } }, sdS('sdAfter', { after: sdTok(after) }) + (limit ? ' / ' + sdTok(limit) : '')),
                 h(
                   'button',
                   {
@@ -384,7 +391,7 @@
                       props.onUse(item)
                     },
                   },
-                  item.live ? '插入' : '启用并插入',
+                  item.live ? sdS('sdInsert') : sdS('sdEnableInsert'),
                 ),
               )
             : null,
@@ -398,13 +405,13 @@
           'data-compact': compact ? '1' : undefined,
           style: { left: props.left + 'px', bottom: props.bottom + 'px', width: props.width + 'px' },
           role: 'dialog',
-          'aria-label': '技能推荐',
+          'aria-label': sdS('sdTitle'),
         },
         h(
           'div',
           { className: '__rp_sdHead' },
-          h('b', null, compact ? '推荐' : '技能推荐'),
-          h('button', { type: 'button', className: '__rp_sdX', title: '收起（Esc）', 'aria-label': '收起', onClick: props.onClose }, '×'),
+          h('b', null, compact ? sdS('sdTitleShort') : sdS('sdTitle')),
+          h('button', { type: 'button', className: '__rp_sdX', title: sdS('sdCloseEsc'), 'aria-label': sdS('sdCollapse'), onClick: props.onClose }, '×'),
         ),
         items.length
           ? SD_GROUPS.map(function (group) {
@@ -412,9 +419,9 @@
                 return (item.group || 'ops') === group[0]
               })
               if (!list.length) return null
-              return h(React.Fragment, { key: group[0] }, h('div', { className: '__rp_sdGrp' }, group[1]), list.map(row))
+              return h(React.Fragment, { key: group[0] }, h('div', { className: '__rp_sdGrp' }, sdS(group[1])), list.map(row))
             })
-          : h('div', { className: '__rp_sdEmpty', style: { padding: '4px' } }, props.failed ? '读取推荐失败，稍后自动重试。' : '写几句你要做的事，停顿一下就会推荐。'),
+          : h('div', { className: '__rp_sdEmpty', style: { padding: '4px' } }, props.failed ? sdS('sdFailed') : sdS('sdEmpty')),
         props.notice
           ? h(
               'div',
@@ -431,7 +438,7 @@
                 : null,
             )
           : null,
-        h('div', { className: '__rp_sdFoot' }, '双击使用 · 右键不再推荐 · Esc 收起'),
+        h('div', { className: '__rp_sdFoot' }, sdS('sdFoot')),
       )
     }
 
@@ -507,18 +514,18 @@
       var restore = function (item, swap) {
         if (busy.current) return
         busy.current = true
-        setNotice({ text: '正在启用「' + sdLabel(item) + '」……' })
+        setNotice({ text: sdS('sdEnabling', { name: sdLabel(item) }) })
         var first = swap ? sdPark(swap.directoryName, 'park', sessionId) : Promise.resolve({ ok: true })
         first
           .then(function (parked) {
             if (!parked.ok) {
               var used = parked.value && parked.value.error === 'in-use'
-              throw new Error(used ? '「' + swap.name + '」正被别的对话使用，没有替换。' : '停用「' + swap.name + '」失败。')
+              throw new Error(used ? sdS('sdErrInUse', { name: swap.name }) : sdS('sdErrPark', { name: swap.name }))
             }
             return sdPark(item.directoryName || item.name, 'restore', sessionId).then(function (restored) {
               if (restored.ok) return
               if (swap) sdPark(swap.directoryName, 'restore', sessionId) // 回滚刚才的停用
-              throw new Error('启用「' + sdLabel(item) + '」失败。')
+              throw new Error(sdS('sdErrRestore', { name: sdLabel(item) }))
             })
           })
           .then(function () {
@@ -529,7 +536,7 @@
             }, 900)
             setNotice(null)
             setToast({
-              text: swap ? '已用「' + sdLabel(item) + '」替换「' + swap.name + '」并插入' : '已启用「' + sdLabel(item) + '」并插入',
+              text: swap ? sdS('sdSwapped', { a: sdLabel(item), b: swap.name }) : sdS('sdEnabled', { name: sdLabel(item) }),
               undo: function () {
                 sdPark(item.directoryName || item.name, 'park', sessionId)
                   .then(function () {
@@ -537,7 +544,7 @@
                     return null
                   })
                   .then(refresh)
-                setToast({ text: '已撤销' })
+                setToast({ text: sdS('sdUndone') })
               },
             })
             close()
@@ -560,12 +567,12 @@
         }
         if (!open) setOpen(true)
         if (!item.movable) {
-          setNotice({ text: '「' + sdLabel(item) + '」不在可启用的技能目录里，请在 PULSE 面板里处理。' })
+          setNotice({ text: sdS('sdNotMovable', { name: sdLabel(item) }) })
           return
         }
         var after = data.liveTokens + (item.tokens || 0)
         if (limitTokens && after > limitTokens) {
-          setNotice({ text: '启用后会超出预算线，正在找一个可以替换的技能……' })
+          setNotice({ text: sdS('sdFindingSwap') })
           fetch('/dsh-running-panel/loadout?session=' + encodeURIComponent(sessionId), { cache: 'no-store' })
             .then(function (response) {
               return response.ok ? response.json() : null
@@ -579,25 +586,25 @@
                 .sort(function (a, b) {
                   return (a.uses || 0) - (b.uses || 0) || (a.lastAt || 0) - (b.lastAt || 0) || (b.tokens || 0) - (a.tokens || 0)
                 })[0]
-              var text = '启用「' + sdLabel(item) + '」后目录预算 ' + sdTok(after) + '，超过预算线 ' + sdTok(limitTokens) + '。'
+              var text = sdS('sdOver', { name: sdLabel(item), after: sdTok(after), limit: sdTok(limitTokens) })
               var actions = []
               if (candidate) {
-                text += '可以停用很少用的「' + candidate.name + '」（用过 ' + (candidate.uses || 0) + ' 次，' + sdTok(candidate.tokens) + ' tok）来换。'
+                text += sdS('sdSwapOffer', { name: candidate.name, n: candidate.uses || 0, tok: sdTok(candidate.tokens) })
                 actions.push({
-                  label: '替换并插入',
+                  label: sdS('sdSwapInsert'),
                   run: function () {
                     restore(item, candidate)
                   },
                 })
               }
               actions.push({
-                label: '直接启用（超线只变色）',
+                label: sdS('sdEnableAnyway'),
                 run: function () {
                   restore(item, null)
                 },
               })
               actions.push({
-                label: '取消',
+                label: sdS('sdCancel'),
                 run: function () {
                   setNotice(null)
                 },
@@ -606,10 +613,10 @@
             })
             .catch(function () {
               setNotice({
-                text: '读取技能列表失败。',
+                text: sdS('sdLoadFailed'),
                 actions: [
                   {
-                    label: '直接启用',
+                    label: sdS('sdEnableDirect'),
                     run: function () {
                       restore(item, null)
                     },
@@ -620,16 +627,16 @@
           return
         }
         setNotice({
-          text: '启用「' + sdLabel(item) + '」会占用 +' + sdTok(item.tokens) + ' tok（目录预算 ' + sdTok(after) + (limitTokens ? ' / ' + sdTok(limitTokens) : '') + '）。',
+          text: sdS('sdConfirmEnable', { name: sdLabel(item), tok: sdTok(item.tokens), after: sdTok(after) + (limitTokens ? ' / ' + sdTok(limitTokens) : '') }),
           actions: [
             {
-              label: '启用并插入',
+              label: sdS('sdEnableInsert'),
               run: function () {
                 restore(item, null)
               },
             },
             {
-              label: '取消',
+              label: sdS('sdCancel'),
               run: function () {
                 setNotice(null)
               },
@@ -644,7 +651,7 @@
         list.push(item.name)
         setPref('skillDockDismissed', list.slice(-200))
         setToast({
-          text: '不再推荐「' + sdLabel(item) + '」',
+          text: sdS('sdHidden', { name: sdLabel(item) }),
           undo: function () {
             setPref(
               'skillDockDismissed',
@@ -652,7 +659,7 @@
                 return name !== item.name
               }),
             )
-            setToast({ text: '已恢复推荐' })
+            setToast({ text: sdS('sdUnhidden') })
             refresh()
           },
         })
@@ -724,7 +731,7 @@
                   key: item.name,
                   className: '__rp_sdSlot',
                   'data-off': item.live ? undefined : '1',
-                  title: sdLabel(item) + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · 已停用，点击启用') + ' · 右键不再推荐',
+                  title: sdLabel(item) + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · ' + sdS('sdParkedClick')) + ' · ' + sdS('sdHideHint'),
                   style: { animationDelay: index * 50 + 'ms' },
                   onClick: function () {
                     use(item)
@@ -742,7 +749,7 @@
           : [
               h(
                 'div',
-                { key: 'idle', className: '__rp_sdSlot', style: { cursor: 'default' }, title: '暂时没有推荐' },
+                { key: 'idle', className: '__rp_sdSlot', style: { cursor: 'default' }, title: sdS('sdIdle') },
                 h('div', { className: '__rp_sdIc', style: { color: '#7d868c', borderStyle: 'dashed' } }, '··'),
                 h('div', { className: '__rp_sdBar' }),
                 h('div', { className: '__rp_sdKey' }, ' '),
@@ -750,10 +757,10 @@
             ]
       var more = h(
         'button',
-        { type: 'button', key: 'more', className: '__rp_sdSlot' + (full ? '' : ' __rp_sdMini'), title: open ? '收起' : '展开全部推荐', onClick: toggle },
-        h('div', { className: '__rp_sdIc' }, full ? (open ? '收起' : '+' + Math.max(0, items.length - 3)) : h('span', null, '◉', items.length ? h('span', { className: '__rp_sdBadge' }, String(items.length)) : null)),
+        { type: 'button', key: 'more', className: '__rp_sdSlot' + (full ? '' : ' __rp_sdMini'), title: open ? sdS('sdCollapse') : sdS('sdExpand'), onClick: toggle },
+        h('div', { className: '__rp_sdIc' }, full ? (open ? sdS('sdCollapse') : '+' + Math.max(0, items.length - 3)) : h('span', null, '◉', items.length ? h('span', { className: '__rp_sdBadge' }, String(items.length)) : null)),
         h('div', { className: '__rp_sdBar' }),
-        h('div', { className: '__rp_sdKey' }, full ? '展开' : '推荐'),
+        h('div', { className: '__rp_sdKey' }, full ? sdS('sdMore') : sdS('sdTitleShort')),
       )
       return sdPortal(
         h(
@@ -781,7 +788,7 @@
                 'div',
                 { className: '__rp_sdToast', role: 'status', style: { left: panelLeft + 'px', maxWidth: panelWidth + 'px', bottom: geo.bottom + 78 + 'px' } },
                 toast.text,
-                toast.undo ? h('button', { type: 'button', className: '__rp_sdBtn', onClick: toast.undo }, '撤销') : null,
+                toast.undo ? h('button', { type: 'button', className: '__rp_sdBtn', onClick: toast.undo }, sdS('sdUndo')) : null,
               )
             : null,
         ),

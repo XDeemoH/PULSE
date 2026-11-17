@@ -643,6 +643,57 @@ window.__ModuleLoader__.load({
       restoreFailed: '启用失败',
       clear: '清空',
       rightHint: '想边聊边看：打开右侧栏，在「新标签页」里选「运行中」，面板就会停靠到对话右侧。',
+      driftRemoved: "已卸载：{names}。",
+      driftAdded: "新安装：{names}。",
+      driftRestart: "重启 DSH 后生效（DSH 只在启动时加载插件）。",
+      sdTitle: "技能推荐",
+      sdTitleShort: "推荐",
+      sdCloseEsc: "收起（Esc）",
+      sdCollapse: "收起",
+      sdExpand: "展开全部推荐",
+      sdMore: "展开",
+      sdEmpty: "写几句你要做的事，停顿一下就会推荐。",
+      sdFailed: "读取推荐失败，稍后自动重试。",
+      sdFoot: "双击使用 · 右键不再推荐 · Esc 收起",
+      sdIdle: "暂时没有推荐",
+      sdHideHint: "右键不再推荐",
+      sdParked: "已停用",
+      sdParkedClick: "已停用，点击启用",
+      sdLoaded: "本会话已加载",
+      sdUses: "用过 {n} 次",
+      sdAfter: "已停用 · 启用后预算 {after}",
+      sdInsert: "插入",
+      sdEnableInsert: "启用并插入",
+      sdWhyDraft: "提到「{x}」",
+      sdWhyRecent: "最近说过「{x}」",
+      sdWhyPair: "常和「{x}」一起用",
+      sdWhyPairAny: "常和本会话的技能一起用",
+      sdWhyHabit: "你常用",
+      sdWhyPicked: "你常从这里选",
+      sdEnabling: "正在启用「{name}」……",
+      sdErrInUse: "「{name}」正被别的对话使用，没有替换。",
+      sdErrPark: "停用「{name}」失败。",
+      sdErrRestore: "启用「{name}」失败。",
+      sdSwapped: "已用「{a}」替换「{b}」并插入",
+      sdEnabled: "已启用「{name}」并插入",
+      sdUndone: "已撤销",
+      sdUndo: "撤销",
+      sdNotMovable: "「{name}」不在可启用的技能目录里，请在 PULSE 面板里处理。",
+      sdFindingSwap: "启用后会超出预算线，正在找一个可以替换的技能……",
+      sdOver: "启用「{name}」后目录预算 {after}，超过预算线 {limit}。",
+      sdSwapOffer: "可以停用很少用的「{name}」（用过 {n} 次，{tok} tok）来换。",
+      sdSwapInsert: "替换并插入",
+      sdEnableAnyway: "直接启用（超线只变色）",
+      sdCancel: "取消",
+      sdLoadFailed: "读取技能列表失败。",
+      sdEnableDirect: "直接启用",
+      sdConfirmEnable: "启用「{name}」会占用 +{tok} tok（目录预算 {after}）。",
+      sdHidden: "不再推荐「{name}」",
+      sdUnhidden: "已恢复推荐",
+      sdGVisual: "视觉",
+      sdGCode: "代码",
+      sdGThought: "思考",
+      sdGOps: "行动",
     }
 
     var en = {
@@ -1255,6 +1306,57 @@ window.__ModuleLoader__.load({
       restoreFailed: 'Enable failed',
       clear: 'Clear',
       rightHint: 'To watch it beside the chat: open the right sidebar and pick "Running" under "New tab".',
+      driftRemoved: "Uninstalled: {names}.",
+      driftAdded: "Newly installed: {names}.",
+      driftRestart: "Takes effect after you restart DSH (it loads plugins only at startup).",
+      sdTitle: "Skill picks",
+      sdTitleShort: "Picks",
+      sdCloseEsc: "Close (Esc)",
+      sdCollapse: "Close",
+      sdExpand: "Show all picks",
+      sdMore: "More",
+      sdEmpty: "Describe what you want to do; picks appear when you pause.",
+      sdFailed: "Couldn't load picks. Retrying shortly.",
+      sdFoot: "Double-click to use · Right-click to hide · Esc to close",
+      sdIdle: "No picks yet",
+      sdHideHint: "right-click to hide",
+      sdParked: "parked",
+      sdParkedClick: "parked, click to enable",
+      sdLoaded: "loaded in this conversation",
+      sdUses: "used {n}×",
+      sdAfter: "Parked · budget after enabling {after}",
+      sdInsert: "Insert",
+      sdEnableInsert: "Enable and insert",
+      sdWhyDraft: "mentions \"{x}\"",
+      sdWhyRecent: "you said \"{x}\" recently",
+      sdWhyPair: "often used with {x}",
+      sdWhyPairAny: "often used with skills in this conversation",
+      sdWhyHabit: "you use it often",
+      sdWhyPicked: "you often pick it here",
+      sdEnabling: "Enabling {name}…",
+      sdErrInUse: "{name} is in use by another conversation. Nothing was swapped.",
+      sdErrPark: "Couldn't park {name}.",
+      sdErrRestore: "Couldn't enable {name}.",
+      sdSwapped: "Swapped {b} for {a} and inserted it",
+      sdEnabled: "Enabled {name} and inserted it",
+      sdUndone: "Undone",
+      sdUndo: "Undo",
+      sdNotMovable: "{name} isn't in a skill folder PULSE can move. Manage it from the PULSE panel.",
+      sdFindingSwap: "That would cross the budget line. Looking for a skill to swap out…",
+      sdOver: "Enabling {name} brings the catalog to {after}, over the {limit} line. ",
+      sdSwapOffer: "You could park {name} instead (used {n}×, {tok} tok).",
+      sdSwapInsert: "Swap and insert",
+      sdEnableAnyway: "Enable anyway (over the line only changes colour)",
+      sdCancel: "Cancel",
+      sdLoadFailed: "Couldn't read the skill list.",
+      sdEnableDirect: "Enable",
+      sdConfirmEnable: "Enabling {name} adds {tok} tok (catalog {after}).",
+      sdHidden: "Hiding {name}",
+      sdUnhidden: "Showing it again",
+      sdGVisual: "Visual",
+      sdGCode: "Code",
+      sdGThought: "Thinking",
+      sdGOps: "Action",
     }
 
     /* ── 显示名 / tag 词典（Host 的 /catalog 路由） ───────────────────── */
@@ -2080,7 +2182,7 @@ window.__ModuleLoader__.load({
       '.__rp_resetBtn{display:inline-flex;align-items:center;justify-content:center;min-height:30px;border:1px solid color-mix(in srgb,var(--rp-rust) 55%,var(--dsw-alias-border-l2));border-radius:5px;background:transparent;color:color-mix(in srgb,var(--rp-rust) 85%,var(--dsw-alias-label-primary));font:inherit;font-size:12px;padding:3px 10px;cursor:pointer}',
       '.__rp_resetBtn:hover{background:color-mix(in srgb,var(--rp-rust) 10%,transparent);border-color:var(--rp-rust)}',
       '.__rp_resetBtn:focus-visible{outline:2px solid var(--rp-rust);outline-offset:2px}',
-      '.__rp_confirmWrap{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);--rp-amber:#d89140;--rp-rust:#b6462a}',
+      '.__rp_confirmWrap{position:fixed;inset:0;z-index:460;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);--rp-amber:#d89140;--rp-rust:#b6462a}',
       '.__rp_confirm{width:min(380px,100%);background:#0f1216;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.6);color:var(--dsw-alias-label-primary)}',
       '.__rp_confirm h3{margin:0 0 8px;font-size:16px;font-weight:600}',
       '.__rp_confirm p{margin:0 0 14px;font-size:13px;line-height:1.55;color:var(--dsw-alias-label-secondary)}',
@@ -4217,6 +4319,21 @@ window.__ModuleLoader__.load({
       return Boolean(pluginVersionSeen) && pluginVersionSeen !== CLIENT_VERSION
     }
 
+    var profileDriftSeen = null
+    /** 插件已卸载 / 新装但还没重启：DSH 只在启动时加载插件，提示一下免得以为没生效。 */
+    function ProfileDrift(props) {
+      var t = props.t
+      var drift = profileDriftSeen
+      if (!drift) return null
+      var removed = Array.isArray(drift.removed) ? drift.removed : []
+      var added = Array.isArray(drift.added) ? drift.added : []
+      if (!removed.length && !added.length) return null
+      var parts = []
+      if (removed.length) parts.push(fill(t('driftRemoved'), 'names', removed.join('、')))
+      if (added.length) parts.push(fill(t('driftAdded'), 'names', added.join('、')))
+      return h('div', { className: '__rp_warnBox __rp_driftWarn', role: 'status', key: 'profile-drift' }, parts.join(' ') + ' ' + t('driftRestart'))
+    }
+
     function VersionMismatch(props) {
       var t = props.t
       if (!hostOutdated()) return null
@@ -4370,6 +4487,51 @@ window.__ModuleLoader__.load({
       ]
     }
 
+    /**
+     * 设置窗口打开时，右侧栏里的 PULSE 面板不虚化、不压暗：遮罩在面板的位置挖一个洞（mask 同样裁掉 backdrop-filter），
+     * 设置窗口在剩下的区域里居中，改视效设置时能直接看到面板的变化。面板收起（宽度 0）时不挖洞。
+     */
+    function usePanelCutout() {
+      var pair = React.useState(null)
+      var rect = pair[0]
+      var setRect = pair[1]
+      React.useEffect(function () {
+        var measure = function () {
+          var panel = document.querySelector('[data-sidebar-right-session] .__rp_root')
+          var box = panel ? panel.getBoundingClientRect() : null
+          var next = box && box.width > 40 && box.height > 40 ? { x: Math.round(box.left), y: Math.round(box.top), w: Math.round(box.width), h: Math.round(box.height) } : null
+          setRect(function (previous) {
+            if (!next || !previous) return next
+            return previous.x === next.x && previous.y === next.y && previous.w === next.w && previous.h === next.h ? previous : next
+          })
+        }
+        measure()
+        window.addEventListener('resize', measure)
+        var timer = window.setInterval(measure, 800)
+        return function () {
+          window.removeEventListener('resize', measure)
+          window.clearInterval(timer)
+        }
+      }, [])
+      if (!rect) return {}
+      var hole = 'linear-gradient(#000,#000)'
+      var mask = {
+        WebkitMaskImage: hole + ',' + hole,
+        maskImage: hole + ',' + hole,
+        WebkitMaskSize: '100% 100%,' + rect.w + 'px ' + rect.h + 'px',
+        maskSize: '100% 100%,' + rect.w + 'px ' + rect.h + 'px',
+        WebkitMaskPosition: '0 0,' + rect.x + 'px ' + rect.y + 'px',
+        maskPosition: '0 0,' + rect.x + 'px ' + rect.y + 'px',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+      }
+      // 面板在右边：窗口让出这块地方，在左侧剩余区域居中。
+      if (rect.x > window.innerWidth / 2) mask.paddingRight = window.innerWidth - rect.x + 24 + 'px'
+      return mask
+    }
+
     function SettingsSheet(props) {
       var t = props.t
       usePrefs()
@@ -4377,6 +4539,7 @@ window.__ModuleLoader__.load({
       var resetOpen = resetPair[0]
       var setResetOpen = resetPair[1]
       var closing = useMenuClose(function () { uiStore.set(false) })
+      var cutout = usePanelCutout()
       var requestClose = closing[1]
       var requestCloseRef = React.useRef(requestClose)
       requestCloseRef.current = requestClose
@@ -4497,7 +4660,7 @@ window.__ModuleLoader__.load({
         {
           className: '__rp_setWrap',
           'data-closing': closing[0] ? '1' : undefined,
-          style: menuMotionStyle(),
+          style: Object.assign({}, menuMotionStyle(), cutout),
           onClick: function (event) {
             if (event.target === event.currentTarget) requestClose()
           },
@@ -4599,6 +4762,7 @@ window.__ModuleLoader__.load({
             'div',
             { className: '__rp_inner', style: opts && opts.reveal ? { filter: 'url(#__rp_px)' } : undefined },
             h(VersionMismatch, { t: t }),
+            h(ProfileDrift, { t: t }),
             children,
           ),
         ),
@@ -8953,6 +9117,7 @@ window.__ModuleLoader__.load({
             try {
               var parsed = JSON.parse(message.data)
               if (parsed && typeof parsed.pluginVersion === 'string') pluginVersionSeen = parsed.pluginVersion
+              if (parsed && parsed.profileDrift) profileDriftSeen = parsed.profileDrift
               if (parsed && parsed.context && Number(parsed.context.contextWindow) > 0) contextWindowSeen = Number(parsed.context.contextWindow)
               // 记住最近一次见到的窗口：没有会话上报时预算线仍按它自动算，而不是退回固定值。
               if (parsed && parsed.context && Number(parsed.context.contextWindow) > 0 && Number(prefs.lastContextWindow) !== contextWindowSeen) {
@@ -13092,10 +13257,10 @@ window.__ModuleLoader__.load({
     var SD_FULL = 176
     var SD_MINI = 56
     var SD_GROUPS = [
-      ['visual', '视觉'],
-      ['code', '代码'],
-      ['thought', '思考'],
-      ['ops', '行动'],
+      ['visual', 'sdGVisual'],
+      ['code', 'sdGCode'],
+      ['thought', 'sdGThought'],
+      ['ops', 'sdGOps'],
     ]
     var SD_CSS = [
       '.__rp_sd{position:fixed;z-index:35;display:flex;align-items:flex-end;gap:6px;padding:7px 9px 5px 7px;border-radius:4px;box-sizing:border-box;color:#d9dee2;font-size:12px;--rp-amber:#ff7f00;background:linear-gradient(90deg,rgba(12,14,17,.70),rgba(12,14,17,.30));-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);transform:perspective(900px) rotateY(9deg);transform-origin:left center;animation:__rp_sdIn .22s cubic-bezier(.2,.8,.2,1) both;overflow:hidden}',
@@ -13156,6 +13321,13 @@ window.__ModuleLoader__.load({
       return node
     }
 
+    /** 由 29-plugin 在挂载时设成 ctx.locale.bind(NS)；没设时原样返回键名。 */
+    var sdT = null
+    function sdS(key, vars) {
+      var text = sdT ? sdT(key) : key
+      for (var name in vars || {}) text = fill(text, name, vars[name])
+      return text
+    }
     function sdLabel(item) {
       return (item && (item.zh || item.name)) || ''
     }
@@ -13168,11 +13340,11 @@ window.__ModuleLoader__.load({
     }
     function sdReason(reason) {
       if (!reason) return ''
-      if (reason.kind === 'draft') return '提到「' + reason.text + '」'
-      if (reason.kind === 'recent') return '最近说过「' + reason.text + '」'
-      if (reason.kind === 'pair') return reason.text ? '常和「' + reason.text + '」一起用' : '常和本会话的技能一起用'
-      if (reason.kind === 'habit') return '你常用'
-      if (reason.kind === 'picked') return '你常从这里选'
+      if (reason.kind === 'draft') return sdS('sdWhyDraft', { x: reason.text })
+      if (reason.kind === 'recent') return sdS('sdWhyRecent', { x: reason.text })
+      if (reason.kind === 'pair') return reason.text ? sdS('sdWhyPair', { x: reason.text }) : sdS('sdWhyPairAny')
+      if (reason.kind === 'habit') return sdS('sdWhyHabit')
+      if (reason.kind === 'picked') return sdS('sdWhyPicked')
       return ''
     }
     function sdTok(value) {
@@ -13423,7 +13595,7 @@ window.__ModuleLoader__.load({
               className: '__rp_sdRow',
               'data-sel': selected ? '1' : undefined,
               'data-off': item.live ? undefined : '1',
-              title: sdLabel(item) + ' · /' + item.name + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · 已停用') + ' · 右键不再推荐',
+              title: sdLabel(item) + ' · /' + item.name + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · ' + sdS('sdParked')) + ' · ' + sdS('sdHideHint'),
               onClick: function () {
                 if (compact) props.onUse(item)
                 else setSel(selected ? null : item.name)
@@ -13450,11 +13622,11 @@ window.__ModuleLoader__.load({
                 h(
                   'div',
                   null,
-                  sdTok(item.tokens) + ' tok · 用过 ' + (item.uses || 0) + ' 次' + (item.loaded ? ' · 本会话已加载' : ''),
+                  sdTok(item.tokens) + ' tok · ' + sdS('sdUses', { n: item.uses || 0 }) + (item.loaded ? ' · ' + sdS('sdLoaded') : ''),
                 ),
                 item.live
                   ? null
-                  : h('div', { style: { color: limit && after > limit ? '#ff8a6a' : '#8b949a' } }, '已停用 · 启用后预算 ' + sdTok(after) + (limit ? ' / ' + sdTok(limit) : '')),
+                  : h('div', { style: { color: limit && after > limit ? '#ff8a6a' : '#8b949a' } }, sdS('sdAfter', { after: sdTok(after) }) + (limit ? ' / ' + sdTok(limit) : '')),
                 h(
                   'button',
                   {
@@ -13465,7 +13637,7 @@ window.__ModuleLoader__.load({
                       props.onUse(item)
                     },
                   },
-                  item.live ? '插入' : '启用并插入',
+                  item.live ? sdS('sdInsert') : sdS('sdEnableInsert'),
                 ),
               )
             : null,
@@ -13479,13 +13651,13 @@ window.__ModuleLoader__.load({
           'data-compact': compact ? '1' : undefined,
           style: { left: props.left + 'px', bottom: props.bottom + 'px', width: props.width + 'px' },
           role: 'dialog',
-          'aria-label': '技能推荐',
+          'aria-label': sdS('sdTitle'),
         },
         h(
           'div',
           { className: '__rp_sdHead' },
-          h('b', null, compact ? '推荐' : '技能推荐'),
-          h('button', { type: 'button', className: '__rp_sdX', title: '收起（Esc）', 'aria-label': '收起', onClick: props.onClose }, '×'),
+          h('b', null, compact ? sdS('sdTitleShort') : sdS('sdTitle')),
+          h('button', { type: 'button', className: '__rp_sdX', title: sdS('sdCloseEsc'), 'aria-label': sdS('sdCollapse'), onClick: props.onClose }, '×'),
         ),
         items.length
           ? SD_GROUPS.map(function (group) {
@@ -13493,9 +13665,9 @@ window.__ModuleLoader__.load({
                 return (item.group || 'ops') === group[0]
               })
               if (!list.length) return null
-              return h(React.Fragment, { key: group[0] }, h('div', { className: '__rp_sdGrp' }, group[1]), list.map(row))
+              return h(React.Fragment, { key: group[0] }, h('div', { className: '__rp_sdGrp' }, sdS(group[1])), list.map(row))
             })
-          : h('div', { className: '__rp_sdEmpty', style: { padding: '4px' } }, props.failed ? '读取推荐失败，稍后自动重试。' : '写几句你要做的事，停顿一下就会推荐。'),
+          : h('div', { className: '__rp_sdEmpty', style: { padding: '4px' } }, props.failed ? sdS('sdFailed') : sdS('sdEmpty')),
         props.notice
           ? h(
               'div',
@@ -13512,7 +13684,7 @@ window.__ModuleLoader__.load({
                 : null,
             )
           : null,
-        h('div', { className: '__rp_sdFoot' }, '双击使用 · 右键不再推荐 · Esc 收起'),
+        h('div', { className: '__rp_sdFoot' }, sdS('sdFoot')),
       )
     }
 
@@ -13588,18 +13760,18 @@ window.__ModuleLoader__.load({
       var restore = function (item, swap) {
         if (busy.current) return
         busy.current = true
-        setNotice({ text: '正在启用「' + sdLabel(item) + '」……' })
+        setNotice({ text: sdS('sdEnabling', { name: sdLabel(item) }) })
         var first = swap ? sdPark(swap.directoryName, 'park', sessionId) : Promise.resolve({ ok: true })
         first
           .then(function (parked) {
             if (!parked.ok) {
               var used = parked.value && parked.value.error === 'in-use'
-              throw new Error(used ? '「' + swap.name + '」正被别的对话使用，没有替换。' : '停用「' + swap.name + '」失败。')
+              throw new Error(used ? sdS('sdErrInUse', { name: swap.name }) : sdS('sdErrPark', { name: swap.name }))
             }
             return sdPark(item.directoryName || item.name, 'restore', sessionId).then(function (restored) {
               if (restored.ok) return
               if (swap) sdPark(swap.directoryName, 'restore', sessionId) // 回滚刚才的停用
-              throw new Error('启用「' + sdLabel(item) + '」失败。')
+              throw new Error(sdS('sdErrRestore', { name: sdLabel(item) }))
             })
           })
           .then(function () {
@@ -13610,7 +13782,7 @@ window.__ModuleLoader__.load({
             }, 900)
             setNotice(null)
             setToast({
-              text: swap ? '已用「' + sdLabel(item) + '」替换「' + swap.name + '」并插入' : '已启用「' + sdLabel(item) + '」并插入',
+              text: swap ? sdS('sdSwapped', { a: sdLabel(item), b: swap.name }) : sdS('sdEnabled', { name: sdLabel(item) }),
               undo: function () {
                 sdPark(item.directoryName || item.name, 'park', sessionId)
                   .then(function () {
@@ -13618,7 +13790,7 @@ window.__ModuleLoader__.load({
                     return null
                   })
                   .then(refresh)
-                setToast({ text: '已撤销' })
+                setToast({ text: sdS('sdUndone') })
               },
             })
             close()
@@ -13641,12 +13813,12 @@ window.__ModuleLoader__.load({
         }
         if (!open) setOpen(true)
         if (!item.movable) {
-          setNotice({ text: '「' + sdLabel(item) + '」不在可启用的技能目录里，请在 PULSE 面板里处理。' })
+          setNotice({ text: sdS('sdNotMovable', { name: sdLabel(item) }) })
           return
         }
         var after = data.liveTokens + (item.tokens || 0)
         if (limitTokens && after > limitTokens) {
-          setNotice({ text: '启用后会超出预算线，正在找一个可以替换的技能……' })
+          setNotice({ text: sdS('sdFindingSwap') })
           fetch('/dsh-running-panel/loadout?session=' + encodeURIComponent(sessionId), { cache: 'no-store' })
             .then(function (response) {
               return response.ok ? response.json() : null
@@ -13660,25 +13832,25 @@ window.__ModuleLoader__.load({
                 .sort(function (a, b) {
                   return (a.uses || 0) - (b.uses || 0) || (a.lastAt || 0) - (b.lastAt || 0) || (b.tokens || 0) - (a.tokens || 0)
                 })[0]
-              var text = '启用「' + sdLabel(item) + '」后目录预算 ' + sdTok(after) + '，超过预算线 ' + sdTok(limitTokens) + '。'
+              var text = sdS('sdOver', { name: sdLabel(item), after: sdTok(after), limit: sdTok(limitTokens) })
               var actions = []
               if (candidate) {
-                text += '可以停用很少用的「' + candidate.name + '」（用过 ' + (candidate.uses || 0) + ' 次，' + sdTok(candidate.tokens) + ' tok）来换。'
+                text += sdS('sdSwapOffer', { name: candidate.name, n: candidate.uses || 0, tok: sdTok(candidate.tokens) })
                 actions.push({
-                  label: '替换并插入',
+                  label: sdS('sdSwapInsert'),
                   run: function () {
                     restore(item, candidate)
                   },
                 })
               }
               actions.push({
-                label: '直接启用（超线只变色）',
+                label: sdS('sdEnableAnyway'),
                 run: function () {
                   restore(item, null)
                 },
               })
               actions.push({
-                label: '取消',
+                label: sdS('sdCancel'),
                 run: function () {
                   setNotice(null)
                 },
@@ -13687,10 +13859,10 @@ window.__ModuleLoader__.load({
             })
             .catch(function () {
               setNotice({
-                text: '读取技能列表失败。',
+                text: sdS('sdLoadFailed'),
                 actions: [
                   {
-                    label: '直接启用',
+                    label: sdS('sdEnableDirect'),
                     run: function () {
                       restore(item, null)
                     },
@@ -13701,16 +13873,16 @@ window.__ModuleLoader__.load({
           return
         }
         setNotice({
-          text: '启用「' + sdLabel(item) + '」会占用 +' + sdTok(item.tokens) + ' tok（目录预算 ' + sdTok(after) + (limitTokens ? ' / ' + sdTok(limitTokens) : '') + '）。',
+          text: sdS('sdConfirmEnable', { name: sdLabel(item), tok: sdTok(item.tokens), after: sdTok(after) + (limitTokens ? ' / ' + sdTok(limitTokens) : '') }),
           actions: [
             {
-              label: '启用并插入',
+              label: sdS('sdEnableInsert'),
               run: function () {
                 restore(item, null)
               },
             },
             {
-              label: '取消',
+              label: sdS('sdCancel'),
               run: function () {
                 setNotice(null)
               },
@@ -13725,7 +13897,7 @@ window.__ModuleLoader__.load({
         list.push(item.name)
         setPref('skillDockDismissed', list.slice(-200))
         setToast({
-          text: '不再推荐「' + sdLabel(item) + '」',
+          text: sdS('sdHidden', { name: sdLabel(item) }),
           undo: function () {
             setPref(
               'skillDockDismissed',
@@ -13733,7 +13905,7 @@ window.__ModuleLoader__.load({
                 return name !== item.name
               }),
             )
-            setToast({ text: '已恢复推荐' })
+            setToast({ text: sdS('sdUnhidden') })
             refresh()
           },
         })
@@ -13805,7 +13977,7 @@ window.__ModuleLoader__.load({
                   key: item.name,
                   className: '__rp_sdSlot',
                   'data-off': item.live ? undefined : '1',
-                  title: sdLabel(item) + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · 已停用，点击启用') + ' · 右键不再推荐',
+                  title: sdLabel(item) + ' · ' + sdReason((item.reasons || [])[0]) + (item.live ? '' : ' · ' + sdS('sdParkedClick')) + ' · ' + sdS('sdHideHint'),
                   style: { animationDelay: index * 50 + 'ms' },
                   onClick: function () {
                     use(item)
@@ -13823,7 +13995,7 @@ window.__ModuleLoader__.load({
           : [
               h(
                 'div',
-                { key: 'idle', className: '__rp_sdSlot', style: { cursor: 'default' }, title: '暂时没有推荐' },
+                { key: 'idle', className: '__rp_sdSlot', style: { cursor: 'default' }, title: sdS('sdIdle') },
                 h('div', { className: '__rp_sdIc', style: { color: '#7d868c', borderStyle: 'dashed' } }, '··'),
                 h('div', { className: '__rp_sdBar' }),
                 h('div', { className: '__rp_sdKey' }, ' '),
@@ -13831,10 +14003,10 @@ window.__ModuleLoader__.load({
             ]
       var more = h(
         'button',
-        { type: 'button', key: 'more', className: '__rp_sdSlot' + (full ? '' : ' __rp_sdMini'), title: open ? '收起' : '展开全部推荐', onClick: toggle },
-        h('div', { className: '__rp_sdIc' }, full ? (open ? '收起' : '+' + Math.max(0, items.length - 3)) : h('span', null, '◉', items.length ? h('span', { className: '__rp_sdBadge' }, String(items.length)) : null)),
+        { type: 'button', key: 'more', className: '__rp_sdSlot' + (full ? '' : ' __rp_sdMini'), title: open ? sdS('sdCollapse') : sdS('sdExpand'), onClick: toggle },
+        h('div', { className: '__rp_sdIc' }, full ? (open ? sdS('sdCollapse') : '+' + Math.max(0, items.length - 3)) : h('span', null, '◉', items.length ? h('span', { className: '__rp_sdBadge' }, String(items.length)) : null)),
         h('div', { className: '__rp_sdBar' }),
-        h('div', { className: '__rp_sdKey' }, full ? '展开' : '推荐'),
+        h('div', { className: '__rp_sdKey' }, full ? sdS('sdMore') : sdS('sdTitleShort')),
       )
       return sdPortal(
         h(
@@ -13862,7 +14034,7 @@ window.__ModuleLoader__.load({
                 'div',
                 { className: '__rp_sdToast', role: 'status', style: { left: panelLeft + 'px', maxWidth: panelWidth + 'px', bottom: geo.bottom + 78 + 'px' } },
                 toast.text,
-                toast.undo ? h('button', { type: 'button', className: '__rp_sdBtn', onClick: toast.undo }, '撤销') : null,
+                toast.undo ? h('button', { type: 'button', className: '__rp_sdBtn', onClick: toast.undo }, sdS('sdUndo')) : null,
               )
             : null,
         ),
@@ -13912,6 +14084,7 @@ window.__ModuleLoader__.load({
         clientLayout = null
       }
       echoT = t
+      sdT = t
       try {
         clientSessions = ctx.get('sessions') || null
       } catch (error) {

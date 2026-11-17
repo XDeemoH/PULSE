@@ -18,6 +18,7 @@
             try {
               var parsed = JSON.parse(message.data)
               if (parsed && typeof parsed.pluginVersion === 'string') pluginVersionSeen = parsed.pluginVersion
+              if (parsed && parsed.profileDrift) profileDriftSeen = parsed.profileDrift
               if (parsed && parsed.context && Number(parsed.context.contextWindow) > 0) contextWindowSeen = Number(parsed.context.contextWindow)
               // 记住最近一次见到的窗口：没有会话上报时预算线仍按它自动算，而不是退回固定值。
               if (parsed && parsed.context && Number(parsed.context.contextWindow) > 0 && Number(prefs.lastContextWindow) !== contextWindowSeen) {

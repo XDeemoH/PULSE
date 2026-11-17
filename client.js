@@ -13274,6 +13274,7 @@ window.__ModuleLoader__.load({
      */
     var SD_FULL = 176
     var SD_MINI = 56
+    var SD_LIB_MAX = 20
     var SD_GROUPS = [
       ['visual', 'sdGVisual'],
       ['code', 'sdGCode'],
@@ -13707,7 +13708,8 @@ window.__ModuleLoader__.load({
               })[0]
               var label = lib ? (sdS('sdLang') === 'en' ? lib.label.en : lib.label.zh) : libId
               var parked = lib ? lib.parked.filter(function (skill) { return !(skill.inUse && skill.inUse.length) }) : []
-              var offer = !compact && parked.length >= 2 && list.some(function (item) { return !item.live })
+              // 整库启用只对小库有意义：几十上百个技能一起开会把目录预算撑爆，那种情况请用装配窗口挑。
+              var offer = !compact && parked.length >= 2 && parked.length <= SD_LIB_MAX && list.some(function (item) { return !item.live })
               return h(
                 React.Fragment,
                 { key: libId },

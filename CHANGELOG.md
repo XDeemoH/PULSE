@@ -1,14 +1,21 @@
 # Changelog
 
-## 1.2.0-dev.1 — unreleased (local use only)
+## 1.2.0 — unreleased draft
 
-Skill recommendation dock.
+Skill recommendation dock, plus interface fixes.
 
-- **A dock left of the composer** suggests skills for what you are writing: the top three as slots (Alt+1–3 inserts), the rest in a menu that opens upward and stays in the column left of the composer. It follows the composer as you resize the conversation (three slots, one button, or hidden when there is no room), closes when you click anywhere else, and is drawn as a borderless frosted menu tilted toward the composer, in PULSE's amber.
-- **Local scoring, no model calls** (`skill-suggest-core.js`): matches the draft, the last three user messages (skill names only), skills used together with ones already loaded this session, and what you picked from the dock before. Chinese drafts match English-only descriptions through a small term map; word forms are stemmed; skills that hit several words beat ones that only share one; names about something else are damped; parked skills rank slightly lower; results below 45 % of the best are hidden. Every suggestion says why.
-- **Parked skills** can be enabled from the dock: confirm first, with the budget before and after; when it would cross the budget line, the dock offers to park a rarely used, unpinned, idle skill instead. Undo is offered for 8 s. Right-click hides a suggestion (undoable).
-- New route `/dsh-running-panel/skill-suggest` (read-only, behind the host admission check like every other route).
-- Interface text is Chinese only for now.
+- **Skill dock left of the composer.** It suggests skills for what you are writing. The top three show as slots (Alt+1–3 inserts one); the rest are in a menu that opens upward and stays in the column left of the composer, never over the conversation. The dock follows the composer as you resize the conversation: three slots, one button, or hidden when there is no room. It closes when you click anywhere else. It is drawn as a borderless frosted menu tilted toward the composer, in PULSE's amber, with zh and en text.
+- **Local scoring, no model calls** (`skill-suggest-core.js`). Suggestions come from:
+  - the draft;
+  - the last three user messages (skill names only);
+  - skills often used with the ones already loaded or referenced in this conversation;
+  - what you picked from the dock before.
+
+  Chinese drafts match English-only descriptions through a small term map. Word forms are stemmed. Skills that match several words rank above ones that share a single word. A skill whose name is about something else is ranked lower, and parked skills rank slightly lower. Results below 45 % of the best are hidden, and each suggestion says why it is there. Skills already referenced in the draft (`/name` or a reference chip) are not suggested again, and their names are not matched as content. On 75 real skills and 28 test requests, 27 put the right skill first and 28 had it in the top three.
+- **Enable parked skills from the dock.** You confirm first and see the budget before and after. If enabling would cross the budget line, the dock offers to park a rarely used, unpinned, idle skill instead. Undo is available for 8 s. Right-clicking a suggestion hides it, and that can be undone too.
+- **Restart hint.** When the profile manifest no longer matches the plugins DSH started with (a plugin was uninstalled or newly installed), the panel says the change takes effect after restarting DSH.
+- **Fixes.** The profiles dialog no longer opens behind the loadout window. Settings no longer blurs the docked PULSE panel, so changes to visual settings are visible as you make them.
+- New route `/dsh-running-panel/skill-suggest`. It is read-only and passes the same host admission check as every other route.
 
 ## 1.1.3 — 2026-11-11
 

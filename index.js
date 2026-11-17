@@ -753,23 +753,32 @@ export function apply(ctx) {
    * subagent 运行时给出的 id 也可能是裸 uuid），三种写法都试一次，避免因为前缀
    * 差异把父子关系或任务描述丢掉。
    */
-  /** 读当前配置的插件清单（按修改时间缓存），和启动时加载的清单比，给面板提示「重启后生效」。 */
+  /**
+   * 插件清单漂移：PULSE 随 DSH 启动时读一次插件清单（profile 的 package.json 里的 bundles）记下来，
+   * 之后和磁盘上的清单比，给面板提示「重启后生效」。不用宿主的 startedBundles：它只列实际组装进去的层，
+   * 装了但没组装成层的插件会被误报成「新安装」。按修改时间缓存。
+   */
+  const readManifestBundles = (dir) => {
+    const bundles = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))?.dsh?.profile?.bundles
+    return Array.isArray(bundles) ? bundles : null
+  }
+  let profileDir = ''
+  let bootBundles = null
+  try {
+    const profile = ctx.get('profileContext')
+    if (profile && profile.dir) {
+      profileDir = profile.dir
+      bootBundles = readManifestBundles(profileDir)
+    }
+  } catch {
+    bootBundles = null
+  }
   let driftCache = { mtime: -1, value: { removed: [], added: [] } }
   function currentProfileDrift() {
-    let profile
+    if (!profileDir || !bootBundles) return { removed: [], added: [] }
     try {
-      profile = ctx.get('profileContext')
-    } catch {
-      profile = undefined
-    }
-    if (!profile || !profile.dir || !Array.isArray(profile.startedBundles)) return { removed: [], added: [] }
-    try {
-      const manifest = join(profile.dir, 'package.json')
-      const mtime = statSync(manifest).mtimeMs
-      if (mtime !== driftCache.mtime) {
-        const bundles = JSON.parse(readFileSync(manifest, 'utf8'))?.dsh?.profile?.bundles
-        driftCache = { mtime, value: profileDrift(profile.startedBundles, bundles) }
-      }
+      const mtime = statSync(join(profileDir, 'package.json')).mtimeMs
+      if (mtime !== driftCache.mtime) driftCache = { mtime, value: profileDrift(bootBundles, readManifestBundles(profileDir)) }
       return driftCache.value
     } catch {
       return { removed: [], added: [] }
@@ -4085,10 +4094,22 @@ export function apply(ctx) {
       })
       const suggestions = suggestSkills(rows, { draft, referenced, recent: recentUserTexts(session), used, dismissed, picked }).map((row) => {
         const skill = skills.find((item) => item.name === row.name)
-        return { ...row, directoryName: skill ? skill.directoryName : row.name, uses: skill ? skill.uses : 0, inUse: skill ? skill.inUse : [] }
+        return { ...row, lib: skill ? skill.lib : 'user', directoryName: skill ? skill.directoryName : row.name, uses: skill ? skill.uses : 0, inUse: skill ? skill.inUse : [] }
       })
       const liveTokens = skills.filter((skill) => skill.live).reduce((sum, skill) => sum + skill.tokens, 0)
-      return send(200, { ok: true, suggestions, budget: { liveTokens } })
+      // 推荐涉及到的库：名字（中英）和库里还停着的技能，面板据此分组，并提供「整库启用」。
+      const libraries = [...new Set(suggestions.map((row) => row.lib))].map((id) => {
+        const members = skills.filter((skill) => skill.lib === id)
+        const parked = members.filter((skill) => !skill.live && skill.movable)
+        const label = catalog.libs[id] || { zh: id === 'user' ? '我的技能' : id, en: id === 'user' ? 'My skills' : id }
+        return {
+          id,
+          label: { zh: label.zh || id, en: label.en || label.zh || id },
+          total: members.length,
+          parked: parked.map((skill) => ({ name: skill.name, directoryName: skill.directoryName, tokens: skill.tokens, inUse: skill.inUse || [] })),
+        }
+      })
+      return send(200, { ok: true, suggestions, libraries, budget: { liveTokens } })
     } catch (error) {
       return send((error && error.status) || 500, { error: String(error && (error.code || error.message) || error) })
     }

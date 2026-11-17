@@ -82,6 +82,22 @@
       for (var name in vars || {}) text = fill(text, name, vars[name])
       return text
     }
+    /** 按库分组的顺序：每个库里最高的匹配度从高到低。 */
+    function sdLibraryOrder(items) {
+      var best = {}
+      items.forEach(function (item) {
+        var id = item.lib || 'user'
+        best[id] = Math.max(best[id] || 0, item.match || 0)
+      })
+      return Object.keys(best).sort(function (a, b) {
+        return best[b] - best[a]
+      })
+    }
+    function sdSum(rows) {
+      return rows.reduce(function (sum, row) {
+        return sum + (Number(row.tokens) || 0)
+      }, 0)
+    }
     function sdLabel(item) {
       return (item && (item.zh || item.name)) || ''
     }
@@ -208,7 +224,7 @@
 
     /** 推荐数据：草稿停顿 600ms、换会话、每 20s（页面可见时）各请求一次；前三名变了才扫一次光。 */
     function useSkillSuggestions(card, sessionId, nonce) {
-      var pair = React.useState({ items: [], liveTokens: 0, failed: false })
+      var pair = React.useState({ items: [], libraries: [], liveTokens: 0, failed: false })
       var data = pair[0]
       var setData = pair[1]
       var scanPair = React.useState(0)
@@ -252,7 +268,7 @@
                   })
                 }
                 lastKey = key
-                setData({ items: value.suggestions, liveTokens: (value.budget && value.budget.liveTokens) || 0, failed: false })
+                setData({ items: value.suggestions, libraries: Array.isArray(value.libraries) ? value.libraries : [], liveTokens: (value.budget && value.budget.liveTokens) || 0, failed: false })
               })
               .catch(fail)
           }
@@ -288,6 +304,10 @@
     }
 
     var SD_PANEL_CSS = [
+      '.__rp_sdPanel .__rp_sdGrp{display:flex;align-items:center;justify-content:space-between;gap:8px;letter-spacing:.06em}',
+      '.__rp_sdGrpName{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '.__rp_sdLibBtn{all:unset;flex:none;cursor:pointer;font-size:10.5px;letter-spacing:0;color:var(--rp-amber);padding:1px 6px;border-radius:2px;border:1px solid rgba(255,127,0,.35)}',
+      '.__rp_sdLibBtn:hover{background:var(--rp-amber);color:#1a0f00}',
       '.__rp_sdPanel{border:0;border-radius:4px;box-shadow:none;background:linear-gradient(90deg,rgba(12,14,17,.78) 0,rgba(12,14,17,.52) 70%,rgba(12,14,17,.30));-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);transform:perspective(1000px) rotateY(9deg);transform-origin:left center;animation:__rp_sdTiltIn .26s cubic-bezier(.2,.8,.2,1) both}',
       '.__rp_sdPanel[data-closing="1"]{animation:__rp_sdTiltOut .14s ease-in both}',
       '.__rp_sdPanel .__rp_sdHead b{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.14em}',
@@ -414,12 +434,40 @@
           h('button', { type: 'button', className: '__rp_sdX', title: sdS('sdCloseEsc'), 'aria-label': sdS('sdCollapse'), onClick: props.onClose }, '×'),
         ),
         items.length
-          ? SD_GROUPS.map(function (group) {
+          ? sdLibraryOrder(items).map(function (libId) {
               var list = items.filter(function (item) {
-                return (item.group || 'ops') === group[0]
+                return (item.lib || 'user') === libId
               })
-              if (!list.length) return null
-              return h(React.Fragment, { key: group[0] }, h('div', { className: '__rp_sdGrp' }, sdS(group[1])), list.map(row))
+              var lib = (props.libraries || []).filter(function (row) {
+                return row.id === libId
+              })[0]
+              var label = lib ? (sdS('sdLang') === 'en' ? lib.label.en : lib.label.zh) : libId
+              var parked = lib ? lib.parked.filter(function (skill) { return !(skill.inUse && skill.inUse.length) }) : []
+              var offer = !compact && parked.length >= 2 && list.some(function (item) { return !item.live })
+              return h(
+                React.Fragment,
+                { key: libId },
+                h(
+                  'div',
+                  { className: '__rp_sdGrp' },
+                  h('span', { className: '__rp_sdGrpName', title: lib ? sdS('sdLibCount', { n: lib.total }) : '' }, label),
+                  offer
+                    ? h(
+                        'button',
+                        {
+                          type: 'button',
+                          className: '__rp_sdLibBtn',
+                          title: sdS('sdLibEnableTip', { n: parked.length, tok: sdTok(sdSum(parked)) }),
+                          onClick: function () {
+                            props.onEnableLib(lib, label, parked)
+                          },
+                        },
+                        sdS('sdLibEnable', { n: parked.length }),
+                      )
+                    : null,
+                ),
+                list.map(row),
+              )
             })
           : h('div', { className: '__rp_sdEmpty', style: { padding: '4px' } }, props.failed ? sdS('sdFailed') : sdS('sdEmpty')),
         props.notice
@@ -644,6 +692,66 @@
           ],
         })
       }
+      var enableLib = function (lib, label, parked) {
+        if (!lib || !parked.length) return
+        var tok = sdSum(parked)
+        var after = data.liveTokens + tok
+        var dirs = parked.map(function (skill) {
+          return skill.directoryName || skill.name
+        })
+        var post = function (action, extra) {
+          return fetch('/dsh-running-panel/park', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(Object.assign({ directoryNames: dirs, action: action, sessionId: sessionId || '' }, extra || {})),
+          })
+        }
+        var run = function () {
+          if (busy.current) return
+          busy.current = true
+          setNotice({ text: sdS('sdEnabling', { name: label }) })
+          post('restore')
+            .then(function (response) {
+              return response.json().catch(function () {
+                return {}
+              })
+            })
+            .then(function (value) {
+              var failed = value && Array.isArray(value.failed) ? value.failed : []
+              var restored = (value && value.restored) || 0
+              if (!restored) throw new Error(sdS('sdLibFailed', { names: failed.join('、') || label }))
+              setNotice(failed.length ? { text: sdS('sdLibFailed', { names: failed.join('、') }) } : null)
+              setToast({
+                text: sdS('sdLibEnabled', { lib: label, n: restored }),
+                undo: function () {
+                  post('park', { force: true }).then(refresh, refresh)
+                  setToast({ text: sdS('sdUndone') })
+                },
+              })
+              refresh()
+            })
+            .catch(function (error) {
+              setNotice({ text: String((error && error.message) || error) })
+            })
+            .then(function () {
+              busy.current = false
+            })
+        }
+        var text = sdS('sdLibConfirm', { lib: label, n: parked.length, tok: sdTok(tok), after: sdTok(after) + (limitTokens ? ' / ' + sdTok(limitTokens) : '') })
+        if (limitTokens && after > limitTokens) text += sdS('sdLibOver', { limit: sdTok(limitTokens) })
+        setNotice({
+          text: text,
+          actions: [
+            { label: sdS('sdLibDo'), run: run },
+            {
+              label: sdS('sdCancel'),
+              run: function () {
+                setNotice(null)
+              },
+            },
+          ],
+        })
+      }
       var dismiss = function (item) {
         var list = sdDismissed().filter(function (name) {
           return name !== item.name
@@ -781,6 +889,8 @@
                 notice: notice,
                 onUse: use,
                 onDismiss: dismiss,
+                onEnableLib: enableLib,
+                libraries: data.libraries,
               })
             : null,
           toast

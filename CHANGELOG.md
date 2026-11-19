@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.4 — 2026-11-19
+## 1.2.0 — 2026-11-19
 
 Skill recommendation dock, plus interface fixes.
 

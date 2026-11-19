@@ -1,10 +1,11 @@
 # Changelog
 
-## 1.2.0 — unreleased draft
+## 1.1.4 — 2026-11-19
 
 Skill recommendation dock, plus interface fixes.
 
 - **Skill dock left of the composer.** It suggests skills for what you are writing. The top three show as slots (Alt+1–3 inserts one); the rest are in a menu that opens upward and stays in the column left of the composer, never over the conversation. The dock follows the composer as you resize the conversation: three slots, one button, or hidden when there is no room. It closes when you click anywhere else. It is drawn as a borderless frosted menu tilted toward the composer, in PULSE's amber, with zh and en text.
+- **Picks grouped by library.** The menu groups suggestions by the library they come from, so same-named skills from different libraries are told apart. A library with 2–20 idle parked skills, at least one of them suggested, offers **enable all**. You confirm first and see the tokens and the budget before and after, and you can undo it. Larger libraries don't get the button: enabling dozens of skills at once would blow the catalog budget, so pick from the loadout window instead.
 - **Local scoring, no model calls** (`skill-suggest-core.js`). Suggestions come from:
   - the draft;
   - the last three user messages (skill names only);
@@ -13,7 +14,7 @@ Skill recommendation dock, plus interface fixes.
 
   Chinese drafts match English-only descriptions through a small term map. Word forms are stemmed. Skills that match several words rank above ones that share a single word. A skill whose name is about something else is ranked lower, and parked skills rank slightly lower. Results below 45 % of the best are hidden, and each suggestion says why it is there. Skills already referenced in the draft (`/name` or a reference chip) are not suggested again, and their names are not matched as content. On 75 real skills and 28 test requests, 27 put the right skill first and 28 had it in the top three.
 - **Enable parked skills from the dock.** You confirm first and see the budget before and after. If enabling would cross the budget line, the dock offers to park a rarely used, unpinned, idle skill instead. Undo is available for 8 s. Right-clicking a suggestion hides it, and that can be undone too.
-- **Restart hint.** When the profile manifest no longer matches the plugins DSH started with (a plugin was uninstalled or newly installed), the panel says the change takes effect after restarting DSH.
+- **Restart hint.** When a plugin was uninstalled or newly installed since DSH started, the panel says the change takes effect after restarting DSH. It compares the profile manifest with the copy read at startup, so a bundle that is installed but not composed as a layer is not reported as new.
 - **Fixes.** The profiles dialog no longer opens behind the loadout window. Settings no longer blurs the docked PULSE panel, so changes to visual settings are visible as you make them.
 - New route `/dsh-running-panel/skill-suggest`. It is read-only and passes the same host admission check as every other route.
 

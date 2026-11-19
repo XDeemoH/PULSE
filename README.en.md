@@ -27,6 +27,8 @@ DSH injects a catalog of skills and tool schemas into every turn, and it is invi
 
 ![Skill loadout: budget bar, skills grouped by library, category ring and details](docs/loadout.png)
 
+- **Skill dock** (left of the composer): skills are scored locally, with no model calls, against what you are writing, your recent messages and the skills usually used together. The top three show as slots (Alt+1–3 inserts one). "More" opens the full list, grouped by library, and each pick says why it is there. Skills already referenced in the draft are not suggested again. A parked skill is enabled only after you confirm and see the budget change. If it would cross the budget line, the dock offers to park a rarely used skill instead, and you can undo either. A small library with only a few parked skills can be enabled whole. The dock follows the composer as the conversation is resized and closes when you click elsewhere.
+
 **Goals and ideas**
 - **Goal bar** (one row above the ring): a running DSH `/goal` takes it (read-only, with phase and round segments); otherwise the workspace's own goal. Click for the drawer: confirm, done, edit, new goal, remove, history.
 - **Focus mode** (off by default): skills, tools and groups not used since the goal started are dimmed.
